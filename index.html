@@ -1928,12 +1928,12 @@ function writeSheetRows(ss, name, items, headers) {
       }
     }
 
-    async function pullDataFromGoogleSheets() {
+    async function pullDataFromGoogleSheets(isSilent = false) {
       if (!googleSheetConfig.webAppUrl) {
-        showToast('กรุณาระบุ Web App URL ของ Google Apps Script ก่อน', false);
+        if (!isSilent) showToast('กรุณาระบุ Web App URL ของ Google Apps Script ก่อน', false);
         return;
       }
-      showToast('กำลังดึงข้อมูลล่าสุดจาก Google Sheets...');
+      if (!isSilent) showToast('กำลังดึงข้อมูลล่าสุดจาก Google Sheets...');
       try {
         const res = await fetch(googleSheetConfig.webAppUrl, {
           method: 'GET',
@@ -1962,14 +1962,18 @@ function writeSheetRows(ss, name, items, headers) {
           populateCompanySelectors();
           refreshActiveView();
           handleInitialDeepLink();
-          showToast(`ดึงข้อมูลจาก Google Sheets สำเร็จ (${assets.length} รายการ)`, true);
-          playBeepSound();
+          if (!isSilent) {
+            showToast(`ดึงข้อมูลจาก Google Sheets สำเร็จ (${assets.length} รายการ)`, true);
+            playBeepSound();
+          }
         } else {
           throw new Error(data.message || 'รูปแบบข้อมูลไม่ถูกต้อง');
         }
       } catch(err) {
         console.error('Pull error:', err);
-        showToast('ไม่สามารถดึงข้อมูลได้: ' + (err.message || 'โปรดตรวจสอบ URL และสิทธิ์ Anyone ของ Web App'), false);
+        if (!isSilent) {
+          showToast('ไม่สามารถดึงข้อมูลได้: ' + (err.message || 'โปรดตรวจสอบ URL และสิทธิ์ Anyone ของ Web App'), false);
+        }
       }
     }
 
@@ -3254,7 +3258,7 @@ function writeSheetRows(ss, name, items, headers) {
       // 1. ตรวจสอบ Query Parameter (?asset=... หรือ ?id=... หรือ ?code=...)
       try {
         if (str.includes('?')) {
-          const searchPart = str.includes('?') ? str.substring(str.indexOf('?')) : str;
+          const searchPart = str.substring(str.indexOf('?'));
           const params = new URLSearchParams(searchPart.split('#')[0]);
           const qAsset = params.get('asset') || params.get('id') || params.get('code');
           if (qAsset) return decodeURIComponent(qAsset).trim();
@@ -3284,21 +3288,16 @@ function writeSheetRows(ss, name, items, headers) {
         return str.split('|')[0].trim();
       }
 
-      // 4. กรณีเป็น URL ทั่วไป ดึง Segment ท้ายสุด
+      // 4. กรณีเป็น URL ทั่วไปที่ไม่มี Query หรือ Hash ใด ๆ ให้ถือว่าไม่มีรหัส (ป้องกันนำ URL หน้าเว็บมาเป็นรหัส)
       if (str.startsWith('http://') || str.startsWith('https://')) {
-        try {
-          const u = new URL(str);
-          const q = u.searchParams.get('asset') || u.searchParams.get('id') || u.searchParams.get('code');
-          if (q) return decodeURIComponent(q).trim();
-          const pathSegments = u.pathname.split('/').filter(Boolean);
-          const last = pathSegments[pathSegments.length - 1];
-          if (last && !last.includes('.html') && !last.includes('.com') && !last.includes('.io') && !last.includes('system')) {
-            return decodeURIComponent(last).trim();
-          }
-        } catch(e) {}
+        return '';
       }
 
-      return decodeURIComponent(str).replace(/^[\/#!?]+/, '').trim();
+      const cleanStr = decodeURIComponent(str).replace(/^[\/#!?]+/, '').trim();
+      if (cleanStr.startsWith('http://') || cleanStr.startsWith('https://')) {
+        return '';
+      }
+      return cleanStr;
     }
 
     function findAssetById(id) {
@@ -4900,11 +4899,11 @@ function writeSheetRows(ss, name, items, headers) {
         return;
       } 
 
-      const targetId = extractAssetCodeFromUrl(window.location.href) || 
-                       extractAssetCodeFromUrl(window.location.search) || 
-                       extractAssetCodeFromUrl(window.location.hash);
+      const targetId = extractAssetCodeFromUrl(window.location.search) || 
+                       extractAssetCodeFromUrl(window.location.hash) ||
+                       extractAssetCodeFromUrl(window.location.href);
 
-      if (!targetId || targetId === 'executive' || targetId === 'dashboard') {
+      if (!targetId || targetId === 'executive' || targetId === 'dashboard' || targetId.startsWith('http')) {
         return;
       }
 
@@ -4914,7 +4913,7 @@ function writeSheetRows(ss, name, items, headers) {
       }
 
       // 2. หากยังไม่พบ อาจกำลังรอ Hydrate ข้อมูล ให้หน่วงเวลาลองใหม่สั้นๆ
-      [100, 350, 800, 1500].forEach(delay => {
+      [150, 400].forEach(delay => {
         setTimeout(() => {
           if (!currentActivePassportAssetId) {
             attemptOpenPassport(targetId);
@@ -4922,13 +4921,11 @@ function writeSheetRows(ss, name, items, headers) {
         }, delay);
       });
 
-      // 3. หากมี Google Sheets ให้สั่งดึงข้อมูลล่าสุดมาจับคู่ทันที
+      // 3. หากมี Google Sheets ให้สั่งดึงข้อมูลล่าสุดมาจับคู่ทันที (ทำงานเบื้องหลังเงียบๆ)
       if (googleSheetConfig.webAppUrl) {
-        pullDataFromGoogleSheets().then(() => {
+        pullDataFromGoogleSheets(true).then(() => {
           if (!currentActivePassportAssetId) {
-            if (!attemptOpenPassport(targetId)) {
-              showToast(`ไม่พบรหัสทรัพย์สิน "${targetId}" ในระบบ`, false);
-            }
+            attemptOpenPassport(targetId);
           }
         });
       }
@@ -4961,9 +4958,9 @@ function writeSheetRows(ss, name, items, headers) {
       window.addEventListener('hashchange', handleInitialDeepLink);
       window.addEventListener('popstate', handleInitialDeepLink);
 
-      // ดึงข้อมูลล่าสุดจาก Google Sheets ทันทีเมื่อโหลดหน้าเว็บ
+      // ดึงข้อมูลล่าสุดจาก Google Sheets ในเบื้องหลังแบบเงียบ ๆ (Silent Pull) เมื่อเปิดหน้าเว็บ
       if (googleSheetConfig.webAppUrl && googleSheetConfig.autoSync) {
-        setTimeout(() => pullDataFromGoogleSheets(), 800);
+        setTimeout(() => pullDataFromGoogleSheets(true), 800);
       }
     };
 
