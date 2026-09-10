@@ -155,6 +155,28 @@
       overflow: hidden; 
       border-radius: 2.5mm;
     }
+
+    /* Ultra-Scannable Crisp QR Code Styles with ISO Quiet Zone */
+    .qr-code-box {
+      background-color: #ffffff !important;
+      box-sizing: border-box !important;
+      padding: 1.8mm !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .qr-code-box canvas,
+    .qr-code-box img {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      object-fit: contain !important;
+      display: block !important;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      image-rendering: pixelated;
+    }
   </style>
 </head>
 <body class="h-full flex flex-col bg-stone-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white overflow-hidden">
@@ -597,9 +619,9 @@
             <div>
               <label class="block font-bold text-slate-700 mb-1">ข้อมูลใน QR Code (QR Payload)</label>
               <select id="stickerPayloadMode" onchange="renderStickersPreview()" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold bg-stone-50/50 text-slate-800">
-                <option value="cleanUrl" selected>🌐 URL ลิงก์เปิดบัตรทรัพย์สิน (Smart URL)</option>
-                <option value="quickText">📄 ข้อความข้อมูลครบ (อ่านได้แม้ออฟไลน์)</option>
-                <option value="assetCode">🏷️ เฉพาะรหัสทรัพย์สิน (Raw Asset ID)</option>
+                <option value="cleanUrl" selected>🌐 URL ลิงก์เปิดบัตรทรัพย์สิน (Smart URL คมชัด)</option>
+                <option value="assetCode">🏷️ เฉพาะรหัสทรัพย์สิน (Raw ID - เม็ดใหญ่สแกนง่ายสุด)</option>
+                <option value="quickText">📄 ข้อความข้อมูลย่อ (อ่านได้แม้ออฟไลน์)</option>
               </select>
             </div>
 
@@ -620,11 +642,22 @@
             </div>
           </div>
 
+          <!-- Custom Base URL Config Bar for ultra-clean QR codes -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-stone-50 rounded-2xl border border-stone-200 text-xs">
+            <span class="font-bold text-slate-700 shrink-0 flex items-center gap-1">
+              <span>🌐</span> URL หน้าเว็บสำหรับสร้าง QR:
+            </span>
+            <input type="text" id="stickerCustomUrlInput" onchange="renderStickersPreview()" placeholder="https://amonsart.github.io/cc1971-asset-system1/" class="flex-1 p-2 border border-slate-300 rounded-xl font-mono text-[11px] bg-white text-brand-700 font-bold">
+            <button onclick="resetStickerCustomUrl()" class="px-3 py-2 rounded-xl bg-stone-200 hover:bg-stone-300 text-slate-700 font-bold text-xs shrink-0 transition">
+              รีเซ็ตตามโดเมนจริง
+            </button>
+          </div>
+
           <!-- Quick Tip Banner -->
           <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-900 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="text-base">💡</span>
-              <span><strong>คำแนะนำพิมพ์หลายดวง:</strong> สามารถเลือก "หลายดวงเรียงเต็มหน้ากระดาษ" หรือ "แถวละ 2/3/4 ดวง" เพื่อพิมพ์สติกเกอร์บาร์โค้ดลงสติกเกอร์สำเร็จรูปแผ่น A4 หรือกระดาษม้วนความร้อนแถวคู่ได้ครั้งละหลายสิบหรือร้อยดวงพร้อมกัน</span>
+              <span><strong>คำแนะนำ:</strong> ปรับความหนาแน่น QR Code ให้เป็นเม็ดใหญ่ คมชัด มีขอบขาวรอบด้าน (Quiet Zone) ช่วยให้ใช้กล้องมือถือส่องติดใน 0.1 วินาที</span>
             </div>
             <div class="font-mono text-[10.5px] font-bold text-slate-500">เลือกแล้ว: <span id="stickerSelectedStatText" class="text-brand-700">0</span> รายการ</div>
           </div>
@@ -640,9 +673,49 @@
         </div>
       </main>
 
+      <!-- VIEW: ENTERPRISE STANDARD OFFICIAL A4 REPORTS -->
       <main id="view-reports" class="view-panel hidden flex-1 overflow-y-auto p-4 sm:p-7 space-y-4">
-        <div class="bg-white p-4 rounded-2xl flex justify-between items-center"><div class="flex gap-2"><select id="officialFormSelector" onchange="renderOfficialReportView()" class="p-2 border rounded-xl text-xs font-bold"><option value="form-a4-01">A4-01 ทะเบียนคุมทรัพย์สินถาวร</option><option value="form-a4-02">A4-02 สรุปค่าเสื่อมราคาทางบัญชี</option></select><select id="reportCompanySelector" onchange="changeReportCompany(this.value)" class="p-2 border rounded-xl text-xs font-bold"></select></div><button onclick="executePrintOfficialReport()" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs">พิมพ์รายงาน A4</button></div>
-        <div class="bg-stone-200/60 p-4 sm:p-8 rounded-2xl flex justify-center overflow-x-auto"><div id="officialA4Canvas" class="bg-white w-[210mm] min-h-[297mm] p-10 shadow-2xl relative text-slate-900"></div></div>
+        <div class="bg-white p-4 rounded-3xl border border-stone-200 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div>
+              <label class="block text-[10.5px] font-black text-slate-500 mb-1">📄 เลือกแบบฟอร์มรายงานมาตรฐาน:</label>
+              <select id="officialFormSelector" onchange="handleReportSelectorChange()" class="p-2.5 border border-slate-300 rounded-xl text-xs font-black bg-stone-50 text-slate-800 focus:outline-none focus:border-brand-500">
+                <option value="form-a4-01" selected>A4-01 ทะเบียนคุมทรัพย์สินถาวร (Fixed Asset Register)</option>
+                <option value="form-a4-02">A4-02 ตารางคำนวณค่าเสื่อมราคาและมูลค่าคงเหลือสุทธิ (TAS 16 Schedule)</option>
+                <option value="form-a4-03">A4-03 รายงานสรุปผลการตรวจนับทรัพย์สินกายภาพ (Annual Physical Audit)</option>
+                <option value="form-a4-04">A4-04 ใบส่งมอบ / ใบยืม-คืนทรัพย์สินถาวร (Custody & Handover Slip)</option>
+                <option value="form-a4-05">A4-05 รายงานสถานะการรับประกันและรอบซ่อมบำรุง (Maintenance & Warranty)</option>
+                <option value="form-a4-06">A4-06 ใบขออนุมัติและรับรองการตัดจำหน่าย (Disposal & Write-Off Certificate)</option>
+                <option value="form-a4-07">A4-07 สรุปมูลค่าพอร์ตทรัพย์สินกลุ่มบริษัท (Consolidated Valuation)</option>
+                <option value="form-a4-08">A4-08 บัตรประวัติทรัพย์สินรายชิ้น (Single Asset Passport Spec Sheet)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[10.5px] font-black text-slate-500 mb-1">🏢 สังกัดบริษัท:</label>
+              <select id="reportCompanySelector" onchange="changeReportCompany(this.value)" class="p-2.5 border border-slate-300 rounded-xl text-xs font-bold bg-white text-slate-800"></select>
+            </div>
+
+            <div id="reportExtraFilterContainer" class="flex items-center gap-2">
+              <!-- Dynamically shown options like Year for TAS 16 or Asset selection for Single Spec Sheet -->
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 self-end lg:self-auto shrink-0 pt-2 lg:pt-0">
+            <button onclick="renderOfficialReportView()" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-stone-50 hover:bg-stone-100 text-slate-700 text-xs font-bold transition flex items-center gap-1.5" title="รีเฟรชรายงาน">
+              <span>🔄 รีเฟรช</span>
+            </button>
+            <button onclick="executePrintOfficialReport()" class="px-5 py-2.5 bg-gradient-to-r from-navy-900 to-slate-900 hover:from-navy-800 hover:to-slate-800 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2 transition">
+              <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              <span>พิมพ์รายงาน A4</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Official Report Canvas Preview -->
+        <div class="bg-stone-200/70 p-4 sm:p-8 rounded-3xl flex justify-center overflow-x-auto">
+          <div id="officialA4Canvas" class="bg-white w-[210mm] min-h-[297mm] p-8 sm:p-12 shadow-2xl relative text-slate-900 font-sans border border-slate-300"></div>
+        </div>
       </main>
 
       <main id="view-settings" class="view-panel hidden flex-1 overflow-y-auto p-4 sm:p-7 space-y-4">
@@ -735,9 +808,17 @@
             <p class="text-[10.5px] text-rose-600">การล้างข้อมูลจะลบสินทรัพย์ทั้งหมดบนหน้าจอและซิงค์ข้อมูลว่างไปยัง Google Sheet (หากเปิด Auto-Sync ไว้)</p>
           </div>
         </div>
-        
+
         <div id="settingsPanel-companies" class="hidden space-y-4">
-          <div class="flex justify-between items-center"><h4 class="font-bold text-sm text-slate-800">รายชื่อบริษัทในเครือ (Subsidiary Profiles)</h4><button onclick="openAddCompanyModal()" class="px-3 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition">+ เพิ่มบริษัทใหม่</button></div>
+          <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h4 class="font-black text-sm text-slate-900">รายชื่อบริษัทในเครือ (Subsidiary Profiles)</h4>
+              <p class="text-xs text-slate-400">เพิ่ม ลบ หรือแก้ไขข้อมูลนิติบุคคลในกลุ่มบริษัท CC1971GROUP ข้อมูลจะวิ่งเข้าสู่ฐานข้อมูลกลางและตัวกรองทุกเมนูทันที</p>
+            </div>
+            <button onclick="openAddCompanyModal()" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-black shadow-xs transition flex items-center gap-1.5 shrink-0">
+              <span>+ เพิ่มบริษัทใหม่</span>
+            </button>
+          </div>
           <div id="companiesCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
@@ -986,7 +1067,7 @@
   </div>
 
   <!-- Digital Asset Passport Modal -->
-  <div id="passportModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden no-print">
+  <div id="passportModal" class="fixed inset-0 z-[110] bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden no-print">
     <div class="bg-white rounded-3xl w-full max-w-2xl flex flex-col max-h-[92vh] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150 border border-slate-200">
       <div class="p-4 sm:p-5 bg-gradient-to-r from-navy-950 via-slate-900 to-navy-900 text-white flex justify-between items-center shrink-0 border-b border-white/10">
         <div class="flex items-center gap-3">
@@ -1218,18 +1299,73 @@
     </div>
   </div>
 
-  <!-- Company Modal -->
-  <div id="companyModal" class="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl w-full max-w-sm flex flex-col shadow-2xl overflow-hidden">
-      <div class="p-4 bg-brand-500 text-white flex justify-between items-center"><h3 class="font-bold text-sm">ข้อมูลบริษัท</h3><button onclick="closeCompanyModal()">✕</button></div>
-      <form onsubmit="handleSaveCompany(event)" class="p-5 space-y-3 text-xs">
-        <input type="hidden" id="companyFormId">
-        <input type="text" id="companyFormNameTh" required placeholder="ชื่อไทย" class="w-full p-2 border rounded-xl font-bold">
-        <input type="text" id="companyFormNameEn" placeholder="ชื่ออังกฤษ" class="w-full p-2 border rounded-xl">
-        <input type="text" id="companyFormTaxId" required placeholder="Tax ID" class="w-full p-2 border rounded-xl font-mono">
-        <input type="text" id="companyFormBranch" placeholder="สาขา" class="w-full p-2 border rounded-xl">
-        <input type="text" id="companyLogoUrlInput" placeholder="Logo URL" class="w-full p-2 border rounded-xl">
-        <button type="submit" class="w-full py-2.5 bg-brand-500 text-white font-bold rounded-xl shadow-xs hover:bg-brand-600 transition">บันทึก</button>
+  <!-- Enterprise Company Modal (เพิ่มและแก้ไขบริษัทสมบูรณ์แบบ) -->
+  <div id="companyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden no-print">
+    <div class="bg-white rounded-3xl w-full max-w-lg flex flex-col shadow-2xl overflow-hidden max-h-[92vh]">
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-navy-950 via-slate-900 to-navy-900 text-white flex justify-between items-center shrink-0 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-sm">🏢</div>
+          <h3 id="companyModalTitle" class="font-black text-sm">จัดการข้อมูลบริษัทในเครือ</h3>
+        </div>
+        <button onclick="closeCompanyModal()" class="text-white/80 hover:text-white p-1 rounded-lg">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveCompany(event)" class="p-5 sm:p-6 space-y-3.5 text-xs overflow-y-auto">
+        <input type="hidden" id="companyFormOriginalId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">รหัสย่อบริษัท (Company ID) *</label>
+            <input type="text" id="companyFormIdInput" required placeholder="เช่น CC-ENG, CC-PROP" class="w-full p-2.5 border border-slate-300 rounded-xl font-mono font-bold text-brand-700 bg-stone-50/50">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">สาขา (Branch) *</label>
+            <input type="text" id="companyFormBranch" required placeholder="เช่น สำนักงานใหญ่, สาขา 00001" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">ชื่อบริษัทภาษาไทย (Company Name TH) *</label>
+          <input type="text" id="companyFormNameTh" required placeholder="เช่น บริษัท ซีซี เอ็นจิเนียริ่ง จำกัด" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">ชื่อบริษัทภาษาอังกฤษ (Company Name EN)</label>
+          <input type="text" id="companyFormNameEn" placeholder="เช่น CC ENGINEERING CO., LTD." class="w-full p-2.5 border border-slate-300 rounded-xl font-medium">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">เลขประจำตัวผู้เสียภาษี 13 หลัก *</label>
+            <input type="text" id="companyFormTaxId" required maxlength="13" placeholder="เช่น 0105562089123" class="w-full p-2.5 border border-slate-300 rounded-xl font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ</label>
+            <input type="text" id="companyFormPhone" placeholder="เช่น 02-197-1000" class="w-full p-2.5 border border-slate-300 rounded-xl font-medium">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">ที่อยู่จดทะเบียนทางภาษี (Registered Address)</label>
+          <textarea id="companyFormAddress" rows="2" placeholder="เช่น เลขที่ 197/1 ถนนสาทรใต้ แขวงยานนาวา เขตสาทร กรุงเทพฯ" class="w-full p-2.5 border border-slate-300 rounded-xl font-medium"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">URL โลโก้บริษัท (Logo URL ถ้ามี)</label>
+          <input type="text" id="companyLogoUrlInput" placeholder="https://..." class="w-full p-2.5 border border-slate-300 rounded-xl font-mono text-[11px]">
+        </div>
+
+        <div class="pt-1">
+          <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+            <input type="checkbox" id="companyFormIsHq" class="rounded text-brand-600 focus:ring-brand-500">
+            <span>ตั้งเป็นสำนักงานใหญ่ของกลุ่มบริษัท (Headquarters)</span>
+          </label>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeCompanyModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-stone-50">ยกเลิก</button>
+          <button type="submit" class="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-black rounded-xl shadow-md transition">บันทึกข้อมูลบริษัท</button>
+        </div>
       </form>
     </div>
   </div>
@@ -1389,23 +1525,29 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    var raw = e.postData ? e.postData.contents : "{}";
+    var raw = "";
+    if (e && e.postData && e.postData.contents) {
+      raw = e.postData.contents;
+    } else if (e && e.parameter && e.parameter.postData) {
+      raw = e.parameter.postData;
+    }
+
     var payload = JSON.parse(raw);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    if (payload.assets) {
+    if (payload.assets && Array.isArray(payload.assets)) {
       writeSheetRows(ss, "Assets", payload.assets, [
         "id", "companyId", "name", "category", "serial", "department", 
         "location", "custodian", "status", "cost", "salvage", "lifespan", 
         "acquiredDate", "warrantyDate", "nextServiceDate", "imageUrl", "lastAuditedDate", "lastAuditor"
       ]);
     }
-    if (payload.companies) {
+    if (payload.companies && Array.isArray(payload.companies)) {
       writeSheetRows(ss, "Companies", payload.companies, [
         "id", "nameTh", "nameEn", "taxId", "branch", "address", "phone", "logoUrl", "isHeadquarters"
       ]);
     }
-    if (payload.transactions) {
+    if (payload.transactions && Array.isArray(payload.transactions)) {
       writeSheetRows(ss, "Transactions", payload.transactions, [
         "id", "date", "assetId", "assetName", "type", "details", "person", "signatureUrl", "cost"
       ]);
@@ -1413,7 +1555,7 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "Synced " + (payload.assets ? payload.assets.length : 0) + " assets successfully"
+      message: "Synced data successfully"
     })).setMimeType(ContentService.MimeType.JSON);
   } catch(err) {
     return ContentService.createTextOutput(JSON.stringify({
@@ -1460,6 +1602,58 @@ function writeSheetRows(ss, name, items, headers) {
   });
   sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
 }`;
+
+    // ==========================================
+    // ROBUST REAL-TIME GOOGLE SHEETS SYNC ENGINE
+    // ==========================================
+    async function sendPayloadToGoogleAppsScript(url, payload) {
+      const jsonString = JSON.stringify(payload);
+
+      // Method 1: Fetch with text/plain (Bypasses CORS preflight)
+      try {
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          cache: 'no-cache',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: jsonString
+        });
+        return true;
+      } catch (err) {
+        // Method 2 Fallback: Hidden form submission for restrictive browsers
+        return new Promise((resolve) => {
+          try {
+            const iframe = document.createElement('iframe');
+            iframe.name = 'gas_hidden_iframe_' + Date.now();
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            const form = document.createElement('form');
+            form.target = iframe.name;
+            form.action = url;
+            form.method = 'POST';
+            form.acceptCharset = 'UTF-8';
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'postData';
+            input.value = jsonString;
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+
+            setTimeout(() => {
+              form.remove();
+              iframe.remove();
+              resolve(true);
+            }, 1500);
+          } catch (e) {
+            resolve(false);
+          }
+        });
+      }
+    }
 
     // Signature Pad Initialization & Event Handlers
     function initSignaturePad() {
@@ -1707,7 +1901,7 @@ function writeSheetRows(ss, name, items, headers) {
         openGoogleSheetModal();
         return;
       }
-      showToast('กำลังอัปโหลดข้อมูลไปยัง Google Sheets...');
+      showToast('⏳ กำลังบันทึกข้อมูลขึ้น Google Sheets...');
       try {
         const safeAssets = assets.map(a => {
           const copy = { ...a };
@@ -1724,19 +1918,13 @@ function writeSheetRows(ss, name, items, headers) {
           return copy;
         });
         const payload = { assets: safeAssets, companies, transactions: safeTx };
-
-        await fetch(googleSheetConfig.webAppUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
+        await sendPayloadToGoogleAppsScript(googleSheetConfig.webAppUrl, payload);
 
         saveToLocalStorage();
-        showToast(`อัปโหลดขึ้น Google Sheets สำเร็จ (${assets.length} สินทรัพย์)`, true);
+        showToast(`✅ บันทึกขึ้น Google Sheets สำเร็จ (${assets.length} สินทรัพย์)`, true);
         playBeepSound();
       } catch(err) {
-        showToast('เกิดข้อผิดพลาดในการอัปโหลด: ' + (err.message || err), false);
+        showToast('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + (err.message || err), false);
       }
     }
 
@@ -1773,6 +1961,7 @@ function writeSheetRows(ss, name, items, headers) {
           saveToLocalStorage();
           populateCompanySelectors();
           refreshActiveView();
+          handleInitialDeepLink();
           showToast(`ดึงข้อมูลจาก Google Sheets สำเร็จ (${assets.length} รายการ)`, true);
           playBeepSound();
         } else {
@@ -1836,14 +2025,12 @@ function writeSheetRows(ss, name, items, headers) {
           }
           return copy;
         });
-        const payload = { assets: safeAssets, companies, transactions: safeTx };
-        await fetch(googleSheetConfig.webAppUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
+        await sendPayloadToGoogleAppsScript(googleSheetConfig.webAppUrl, { 
+          assets: safeAssets, 
+          companies, 
+          transactions: safeTx 
         });
-      } catch(e) { console.warn('Google Sheets sync warning:', e); }
+      } catch(e) { console.warn('Realtime sync warning:', e); }
     }
 
     async function silentAutoSync() {
@@ -1859,12 +2046,12 @@ function writeSheetRows(ss, name, items, headers) {
         saveToLocalStorage();
         showToast('ล้างข้อมูลเป็นศูนย์เรียบร้อยแล้ว');
         refreshActiveView();
-        silentAutoSync();
+        await silentAutoSync();
       });
     }
 
     function handleRestoreMockData() {
-      showCustomConfirm('🔄 โหลดข้อมูลตัวอย่าง', 'ระบบจะนำข้อมูลจำลองเริ่มต้นกลับมาทับข้อมูลปัจจุบัน และซิงค์ขึ้น Google Sheet ยืนยันหรือไม่?', () => {
+      showCustomConfirm('🔄 โหลดข้อมูลตัวอย่าง', 'ระบบจะนำข้อมูลจำลองเริ่มต้นกลับมาทับข้อมูลปัจจุบัน และซิงค์ขึ้น Google Sheet ยืนยันหรือไม่?', async () => {
         companies = JSON.parse(initialMockState.companies); 
         users = JSON.parse(initialMockState.users);
         assets = JSON.parse(initialMockState.assets); 
@@ -1873,7 +2060,7 @@ function writeSheetRows(ss, name, items, headers) {
         showToast('โหลดข้อมูลตัวอย่างเรียบร้อยแล้ว');
         populateCompanySelectors(); 
         refreshActiveView(); 
-        silentAutoSync();
+        await silentAutoSync();
       });
     }
 
@@ -2124,9 +2311,10 @@ function writeSheetRows(ss, name, items, headers) {
 
       closeBulkImportModal();
       playBeepSound();
-      showToast(`นำเข้าสำเร็จ! เพิ่มใหม่ ${addedCount} รายการ, เขียนทับ ${updatedCount} รายการ${skippedCount > 0 ? `, ข้าม ${skippedCount} รายการ` : ''}`);
+      showToast(`นำเข้าสำเร็จ! กำลังซิงค์ขึ้น Google Sheets...`);
       refreshActiveView();
-      silentAutoSync();
+      await silentAutoSync();
+      showToast(`✅ ซิงค์เสร็จสิ้น: เพิ่ม ${addedCount} รายการ, เขียนทับ ${updatedCount} รายการ`);
     }
 
     function triggerAssetImageFileSelect() {
@@ -2593,7 +2781,7 @@ function writeSheetRows(ss, name, items, headers) {
       document.getElementById('assetModal').classList.add('hidden'); 
     }
     
-    function handleSaveAsset(e) { 
+    async function handleSaveAsset(e) { 
       e.preventDefault(); 
       const id = document.getElementById('formCode').value.trim(), 
             exId = document.getElementById('formAssetId').value; 
@@ -2619,7 +2807,7 @@ function writeSheetRows(ss, name, items, headers) {
         nextServiceDate: document.getElementById('formNextServiceDate').value,
         imageUrl: chosenImage || defaultFallback, 
         lastAuditedDate: new Date().toISOString().split('T')[0], 
-        lastAuditor: currentUser.fullName 
+        lastAuditor: currentUser ? currentUser.fullName : 'Admin' 
       };
 
       if (exId) {
@@ -2630,22 +2818,29 @@ function writeSheetRows(ss, name, items, headers) {
 
       closeAssetModal(); 
       refreshActiveView(); 
-      showToast(`บันทึกสินทรัพย์ [${id}] สำเร็จ`); 
-      silentAutoSync(); 
+      showToast(`⚡ บันทึกและกำลังซิงค์ [${id}] ลง Google Sheets...`); 
+      await silentAutoSync(); 
+      showToast(`✅ บันทึกสินทรัพย์ [${id}] สำเร็จ`); 
     }
 
-    function handleDeleteAsset(id) { 
+    async function handleDeleteAsset(id) { 
       showCustomConfirm('ยืนยันการลบ', `คุณต้องการลบสินทรัพย์รหัส [${id}] ออกจากระบบและ Google Sheet หรือไม่?`, async () => { 
         assets = assets.filter(a => a.id !== id); 
         refreshActiveView(); 
-        showToast(`ลบสินทรัพย์ [${id}] สำเร็จ`); 
-        silentAutoSync();
+        showToast(`⚡ กำลังลบ [${id}] และซิงค์ฐานข้อมูล...`); 
+        await silentAutoSync();
+        showToast(`✅ ลบสินทรัพย์ [${id}] สำเร็จ`); 
       }); 
     }
 
     function openPassportModal(id) { 
-      const a = assets.find(x => x.id === id); 
-      if (!a) return; 
+      if (!id) return;
+      const cleanTargetId = String(id).trim().toLowerCase();
+      const a = assets.find(x => x.id && x.id.trim().toLowerCase() === cleanTargetId); 
+      if (!a) {
+        showToast(`ไม่พบข้อมูลสินทรัพย์รหัส "${id}" ในระบบ`, false);
+        return;
+      } 
       currentActivePassportAssetId = a.id;
       const comp = companies.find(x => x.id === a.companyId);
       const dep = calculateTAS16Depreciation(a, 2026);
@@ -2757,11 +2952,19 @@ function writeSheetRows(ss, name, items, headers) {
         });
       }
 
-      document.getElementById('passportModal').classList.remove('hidden'); 
+      const modal = document.getElementById('passportModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
     }
 
     function closePassportModal() { 
-      document.getElementById('passportModal').classList.add('hidden'); 
+      const modal = document.getElementById('passportModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
       currentActivePassportAssetId = null;
     }
 
@@ -2863,7 +3066,7 @@ function writeSheetRows(ss, name, items, headers) {
       document.getElementById('transactionModal').classList.add('hidden'); 
     }
 
-    function handleSaveTransaction(e) { 
+    async function handleSaveTransaction(e) { 
       e.preventDefault(); 
       const ast = assets.find(a => a.id === document.getElementById('txAssetSelect').value); 
       if (!ast) return;
@@ -2895,8 +3098,9 @@ function writeSheetRows(ss, name, items, headers) {
 
       closeTransactionModal(); 
       refreshActiveView(); 
-      showToast('บันทึกธุรกรรมพร้อมลายเซ็นเรียบร้อยแล้ว'); 
-      silentAutoSync(); 
+      showToast('⚡ บันทึกธุรกรรมและกำลังซิงค์เข้าคลาวด์...'); 
+      await silentAutoSync(); 
+      showToast('✅ ธุรกรรมถูกบันทึกเรียบร้อย'); 
     }
 
     function renderAuditTable() { 
@@ -2924,67 +3128,89 @@ function writeSheetRows(ss, name, items, headers) {
       document.getElementById('auditProgressBar').style.width = `${pct}%`; 
     }
 
-    function stampAssetAudit(id) { 
+    async function stampAssetAudit(id) { 
       const a = assets.find(x => x.id === id); 
       if (a) { 
         a.lastAuditedDate = new Date().toISOString().split('T')[0]; 
         a.lastAuditor = currentUser.fullName; 
         renderAuditTable(); 
         updateDashboard(); 
-        showToast(`สแตมป์ตรวจนับ [${id}] สำเร็จ`); 
+        showToast(`⚡ บันทึกการตรวจนับ [${id}]...`); 
         playBeepSound(); 
-        silentAutoSync(); 
+        await silentAutoSync(); 
+        showToast(`✅ สแตมป์ตรวจนับ [${id}] สำเร็จ`); 
       } 
     }
 
-    function quickVerifyAllPending() { 
+    async function quickVerifyAllPending() { 
       getScopedAssets().forEach(a => { 
         a.lastAuditedDate = new Date().toISOString().split('T')[0]; 
         a.lastAuditor = currentUser.fullName; 
       }); 
       renderAuditTable(); 
       updateDashboard(); 
-      showToast('ยืนยันตรวจผ่านสินทรัพย์ทั้งหมดแล้ว'); 
+      showToast('⚡ กำลังซิงค์การตรวจผ่านทั้งหมดเข้าชีต...'); 
       playBeepSound(); 
-      silentAutoSync(); 
+      await silentAutoSync(); 
+      showToast('✅ ยืนยันตรวจผ่านสินทรัพย์ทั้งหมดแล้ว'); 
     }
 
     function openLiveScannerModal() { 
-      document.getElementById('liveScannerModal').classList.remove('hidden'); 
+      const modal = document.getElementById('liveScannerModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
       try { 
-        if (!html5QrCodeScanner) html5QrCodeScanner = new Html5Qrcode('qr-reader'); 
+        if (html5QrCodeScanner) {
+          try { html5QrCodeScanner.stop(); } catch(e) {}
+        }
+        html5QrCodeScanner = new Html5Qrcode('qr-reader'); 
         html5QrCodeScanner.start(
           { facingMode: 'environment' }, 
-          { fps: 10, qrbox: { width: 220, height: 220 } }, 
+          { fps: 15, qrbox: { width: 240, height: 240 } }, 
           (t) => { 
             playBeepSound(); 
             closeLiveScannerModal(); 
-            const i = t.includes('#asset=') ? t.split('#asset=')[1] : (t.includes('|') ? t.split('|')[0].replace('CC1971:', '') : t); 
-            const a = assets.find(x => x.id.toLowerCase() === i.toLowerCase()); 
-            if (a) openPassportModal(a.id); 
-            else showToast('ไม่พบรหัส ' + i, false); 
+            const cleanId = extractAssetCodeFromUrl(t);
+            if (cleanId) {
+              hideFullLoginPortal();
+              if (!attemptOpenPassport(cleanId)) {
+                showToast(`สแกนพบ [${cleanId}] แต่ไม่พบในฐานข้อมูล`, false);
+              }
+            } else {
+              showToast('ไม่สามารถระบุรหัสทรัพย์สินได้', false); 
+            }
           }, 
           () => {}
         ); 
-      } catch(e) {} 
+      } catch(e) {
+        console.error('Camera Scanner Error:', e);
+      } 
     }
 
     function closeLiveScannerModal() { 
       if (html5QrCodeScanner) {
         try { 
-          html5QrCodeScanner.stop().then(() => html5QrCodeScanner.clear()); 
+          html5QrCodeScanner.stop().then(() => html5QrCodeScanner.clear()).catch(() => {}); 
         } catch(e) {} 
       }
-      document.getElementById('liveScannerModal').classList.add('hidden'); 
+      const modal = document.getElementById('liveScannerModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
     }
 
     function handleManualScanSubmit() { 
       const v = document.getElementById('manualScanInput').value.trim(); 
       if (v) { 
         closeLiveScannerModal(); 
-        const a = assets.find(x => x.id.toLowerCase() === v.toLowerCase()); 
-        if (a) openPassportModal(a.id); 
-        else showToast('ไม่พบรหัสในระบบ', false); 
+        const cleanId = extractAssetCodeFromUrl(v);
+        hideFullLoginPortal();
+        if (!attemptOpenPassport(cleanId)) {
+          showToast(`ไม่พบรหัส "${cleanId}" ในระบบ`, false);
+        }
       } 
     }
 
@@ -3021,6 +3247,140 @@ function writeSheetRows(ss, name, items, headers) {
       }
     }
 
+    function extractAssetCodeFromUrl(input) {
+      if (!input) return '';
+      let str = String(input).trim();
+      
+      // 1. ตรวจสอบ Query Parameter (?asset=... หรือ ?id=... หรือ ?code=...)
+      try {
+        if (str.includes('?')) {
+          const searchPart = str.includes('?') ? str.substring(str.indexOf('?')) : str;
+          const params = new URLSearchParams(searchPart.split('#')[0]);
+          const qAsset = params.get('asset') || params.get('id') || params.get('code');
+          if (qAsset) return decodeURIComponent(qAsset).trim();
+        }
+      } catch(e) {}
+      
+      // 2. ตรวจสอบ Hash Fragment (#asset=... หรือ #id=... หรือ #CC-IT-001)
+      if (str.includes('#')) {
+        const hashPart = str.substring(str.indexOf('#') + 1).trim();
+        if (hashPart.includes('asset=')) {
+          return decodeURIComponent(hashPart.split('asset=')[1].split('&')[0].replace(/^[\/#!]+/, '')).trim();
+        }
+        if (hashPart.includes('id=')) {
+          return decodeURIComponent(hashPart.split('id=')[1].split('&')[0].replace(/^[\/#!]+/, '')).trim();
+        }
+        const cleanHash = hashPart.split('&')[0].split('?')[0].replace(/^[\/#!]+/, '').trim();
+        if (cleanHash && cleanHash !== 'executive' && cleanHash !== 'dashboard') {
+          return decodeURIComponent(cleanHash).trim();
+        }
+      }
+
+      // 3. รูปแบบข้อความออฟไลน์
+      if (str.includes('CC1971:')) {
+        str = str.split('CC1971:')[1];
+      }
+      if (str.includes('|')) {
+        return str.split('|')[0].trim();
+      }
+
+      // 4. กรณีเป็น URL ทั่วไป ดึง Segment ท้ายสุด
+      if (str.startsWith('http://') || str.startsWith('https://')) {
+        try {
+          const u = new URL(str);
+          const q = u.searchParams.get('asset') || u.searchParams.get('id') || u.searchParams.get('code');
+          if (q) return decodeURIComponent(q).trim();
+          const pathSegments = u.pathname.split('/').filter(Boolean);
+          const last = pathSegments[pathSegments.length - 1];
+          if (last && !last.includes('.html') && !last.includes('.com') && !last.includes('.io') && !last.includes('system')) {
+            return decodeURIComponent(last).trim();
+          }
+        } catch(e) {}
+      }
+
+      return decodeURIComponent(str).replace(/^[\/#!?]+/, '').trim();
+    }
+
+    function findAssetById(id) {
+      if (!id || !assets || assets.length === 0) return null;
+      const clean = String(id).trim().toLowerCase();
+      // 1. Exact or case-insensitive match
+      let found = assets.find(x => x.id && x.id.trim().toLowerCase() === clean);
+      if (found) return found;
+      // 2. Alphanumeric match (ignoring dashes and symbols)
+      const alpha = clean.replace(/[^a-z0-9]/g, '');
+      if (alpha) {
+        found = assets.find(x => x.id && x.id.toLowerCase().replace(/[^a-z0-9]/g, '') === alpha);
+      }
+      return found || null;
+    }
+
+    function attemptOpenPassport(assetId) {
+      if (!assetId) return false;
+      const m = findAssetById(assetId);
+      if (m) {
+        hideFullLoginPortal();
+        document.getElementById('executiveFullScreenView')?.classList.add('hidden');
+        document.getElementById('mainSidebar')?.classList.add('-translate-x-full');
+        document.getElementById('sidebarOverlay')?.classList.add('hidden');
+        openPassportModal(m.id);
+        showToast(`🪪 เปิดบัตรทรัพย์สิน [${m.id}] เรียบร้อยแล้ว`, true);
+        return true;
+      }
+      return false;
+    }
+
+    function getCleanBaseAssetUrl() {
+      let customInput = document.getElementById('stickerCustomUrlInput')?.value?.trim();
+      if (customInput && customInput.startsWith('http')) {
+        let base = customInput.split('?')[0].split('#')[0];
+        if (!base.endsWith('/') && !base.endsWith('.html')) {
+          base += '/';
+        }
+        return base;
+      }
+
+      let detected = '';
+      try {
+        const origin = window.location.origin;
+        let pathname = window.location.pathname;
+        if (origin && !origin.includes('null') && !origin.includes('sandbox') && !origin.includes('blob:')) {
+          detected = `${origin}${pathname}`;
+          if (!detected.endsWith('/') && !detected.endsWith('.html')) {
+            detected += '/';
+          }
+        }
+      } catch (e) {}
+
+      if (!detected || detected.length > 90 || detected.includes('blob:') || detected.includes('srcdoc')) {
+        detected = 'https://amonsart.github.io/cc1971-asset-system1/';
+      }
+
+      const inputEl = document.getElementById('stickerCustomUrlInput');
+      if (inputEl && !inputEl.value) {
+        inputEl.value = detected;
+      }
+      return detected;
+    }
+
+    function resetStickerCustomUrl() {
+      const inputEl = document.getElementById('stickerCustomUrlInput');
+      if (!inputEl) return;
+      let detected = 'https://amonsart.github.io/cc1971-asset-system1/';
+      try {
+        if (window.location.origin && !window.location.origin.includes('null') && !window.location.origin.includes('sandbox')) {
+          let pathname = window.location.pathname;
+          if (!pathname.endsWith('/') && !pathname.includes('.html')) {
+            pathname += '/';
+          }
+          detected = `${window.location.origin}${pathname}`;
+        }
+      } catch (e) {}
+      inputEl.value = detected;
+      renderStickersPreview();
+      showToast('รีเซ็ต URL สำหรับสร้าง QR Code แล้ว');
+    }
+
     function setStickerCopies(num) {
       const input = document.getElementById('stickerCopiesInput');
       if (input) {
@@ -3050,8 +3410,8 @@ function writeSheetRows(ss, name, items, headers) {
       const sz = document.getElementById('stickerSizeSelector')?.value || '70x35';
       const payloadMode = document.getElementById('stickerPayloadMode')?.value || 'cleanUrl';
       const sc = getScopedAssets(); 
+      const cleanBase = getCleanBaseAssetUrl();
 
-      // Initialize all selected by default if empty
       if (selectedStickerAssetIds.size === 0 && sc.length > 0) {
         sc.forEach(a => selectedStickerAssetIds.add(a.id));
       }
@@ -3077,148 +3437,110 @@ function writeSheetRows(ss, name, items, headers) {
         
         let labelInnerHtml = '';
 
-        /* -------------------------------------------------------------
-         * 1. MICRO SIZE: 32 x 25 mm (Thermal Roll)
-         * ------------------------------------------------------------- */
         if (sz === '32x25') {
           labelInnerHtml = `
             <div id="sticker-card-${a.id}" class="label-size-32x25 bg-white border border-slate-400 p-1 flex flex-col justify-between shadow-xs relative cursor-pointer hover:shadow-md transition ${isSelected ? 'ring-2 ring-brand-500' : ''}" onclick="toggleStickerSelection('${a.id}')">
-              <!-- Top micro header -->
               <div class="flex items-center justify-between border-b border-slate-300 pb-0.5 leading-none">
                 <span class="font-black text-[5pt] text-navy-950 uppercase tracking-tighter">CC1971 GROUP</span>
                 <span class="text-[4.5pt] font-mono font-bold text-slate-400">FIXED ASSET</span>
               </div>
-              
-              <!-- Middle content -->
-              <div class="flex items-center gap-1 my-auto">
-                <div id="qr-${a.id}" class="w-[11.5mm] h-[11.5mm] flex items-center justify-center shrink-0 bg-white"></div>
+              <div class="flex items-center gap-1 my-auto overflow-hidden">
+                <div id="qr-${a.id}" class="w-[12mm] h-[12mm] shrink-0 bg-white p-0.5 flex items-center justify-center" title="คลิกเพื่อขยาย QR" onclick="event.stopPropagation(); showZoomQrModal('${a.id}', '${a.name}')"></div>
                 <div class="flex-1 min-w-0 text-left leading-tight">
-                  <div class="font-black text-[6.5pt] text-brand-700 font-mono tracking-tight leading-none">${a.id}</div>
+                  <div class="font-black text-[6.5pt] text-brand-700 font-mono tracking-tight leading-none truncate">${a.id}</div>
                   <div class="text-[5pt] font-bold text-slate-900 line-clamp-2 mt-0.5">${a.name}</div>
                   <div class="text-[4.5pt] font-mono text-slate-500 mt-0.5 truncate">SN:${a.serial || '-'}</div>
                 </div>
               </div>
-
-              <!-- Footer micro warning -->
               <div class="text-[4pt] text-center font-bold text-slate-600 border-t border-slate-200 pt-0.5 leading-none uppercase">
                 DO NOT REMOVE
               </div>
             </div>
           `;
-        } 
-        /* -------------------------------------------------------------
-         * 2. COMPACT SIZE: 50 x 25 mm (Asset Tag)
-         * ------------------------------------------------------------- */
-        else if (sz === '50x25') {
+        } else if (sz === '50x25') {
           labelInnerHtml = `
             <div id="sticker-card-${a.id}" class="label-size-50x25 bg-white border border-slate-400 p-1.5 flex flex-col justify-between shadow-xs relative cursor-pointer hover:shadow-md transition ${isSelected ? 'ring-2 ring-brand-500' : ''}" onclick="toggleStickerSelection('${a.id}')">
-              <!-- Header Bar -->
               <div class="flex items-center justify-between border-b border-slate-300 pb-1 leading-none">
                 <div class="flex items-center gap-1">
                   <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
-                  <span class="font-black text-[6pt] text-navy-950 tracking-tight">${compShort}</span>
+                  <span class="font-black text-[6pt] text-navy-950 tracking-tight truncate max-w-[28mm]">${compShort}</span>
                 </div>
                 <span class="text-[5pt] font-bold text-slate-400 uppercase">ASSET TAG</span>
               </div>
-
-              <!-- Body with QR -->
-              <div class="flex items-center gap-1.5 my-auto">
-                <div id="qr-${a.id}" class="w-[13.5mm] h-[13.5mm] flex items-center justify-center shrink-0 bg-white border border-slate-200 rounded p-0.5"></div>
-                <div class="flex-1 min-w-0 text-left space-y-0.5">
+              <div class="flex items-center gap-1.5 my-auto overflow-hidden">
+                <div class="flex-1 min-w-0 max-w-[30mm] text-left space-y-0.5">
                   <div class="inline-block px-1.5 py-0.5 rounded bg-orange-50 border border-orange-200 text-brand-700 font-mono font-black text-[7.5pt] leading-none">
                     ${a.id}
                   </div>
-                  <div class="text-[6pt] font-bold text-slate-900 line-clamp-2 leading-tight">${a.name}</div>
+                  <div class="text-[6pt] font-bold text-slate-900 line-clamp-1 leading-tight">${a.name}</div>
                   <div class="text-[5pt] text-slate-500 flex justify-between">
-                    <span class="font-mono">SN: ${a.serial || '-'}</span>
-                    <span>${a.department || ''}</span>
+                    <span class="font-mono truncate">SN: ${a.serial || '-'}</span>
                   </div>
                 </div>
+                <div id="qr-${a.id}" class="w-[14mm] h-[14mm] shrink-0 bg-white p-0.5 flex items-center justify-center border border-slate-200 rounded" title="คลิกเพื่อขยาย QR" onclick="event.stopPropagation(); showZoomQrModal('${a.id}', '${a.name}')"></div>
               </div>
-
-              <!-- Footer Warning -->
               <div class="text-[4.5pt] text-center font-bold text-slate-500 border-t border-slate-200 pt-0.5 leading-none">
                 PROPERTY OF CC1971 GROUP - DO NOT REMOVE
               </div>
             </div>
           `;
-        } 
-        /* -------------------------------------------------------------
-         * 3. STANDARD CORPORATE: 70 x 35 mm (ISO / Enterprise)
-         * ------------------------------------------------------------- */
-        else if (sz === '70x35') {
+        } else if (sz === '70x35') {
           labelInnerHtml = `
             <div id="sticker-card-${a.id}" class="label-size-70x35 bg-white border-2 border-slate-800 p-2 flex flex-col justify-between shadow-xs relative cursor-pointer hover:shadow-md transition ${isSelected ? 'ring-2 ring-brand-500' : ''}" onclick="toggleStickerSelection('${a.id}')">
-              <!-- Top Corporate Banner -->
               <div class="flex items-center justify-between border-b-2 border-slate-800 pb-1 leading-none">
-                <div class="flex items-center gap-1.5">
-                  <span class="px-1.5 py-0.5 rounded bg-brand-500 text-white font-black text-[6.5pt] tracking-tight">CC1971</span>
-                  <span class="font-black text-[7pt] text-navy-950 uppercase tracking-tight">${compName}</span>
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="px-1.5 py-0.5 rounded bg-brand-500 text-white font-black text-[6.5pt] tracking-tight shrink-0">CC1971</span>
+                  <span class="font-black text-[7pt] text-navy-950 uppercase tracking-tight truncate max-w-[40mm]">${compName}</span>
                 </div>
-                <span class="font-mono font-black text-[6pt] text-slate-500 uppercase">FIXED ASSET TAG</span>
+                <span class="font-mono font-black text-[5.5pt] text-slate-500 uppercase shrink-0">FIXED ASSET TAG</span>
               </div>
-
-              <!-- Content Body -->
-              <div class="flex items-center gap-2 my-auto">
-                <div class="flex-1 min-w-0 text-left space-y-1">
-                  <div class="flex items-center justify-between">
-                    <span class="font-mono font-black text-[9.5pt] text-brand-700 tracking-tight">${a.id}</span>
-                    <span class="text-[6pt] font-bold text-slate-500 bg-stone-100 px-1.5 py-0.5 rounded">${a.category}</span>
+              <div class="flex items-center justify-between gap-2 my-auto overflow-hidden">
+                <!-- Left text container bounded so it never collides with QR code -->
+                <div class="w-[43mm] max-w-[43mm] text-left space-y-1 overflow-hidden shrink-0">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="font-mono font-black text-[9pt] text-brand-700 tracking-tight truncate">${a.id}</span>
+                    <span class="text-[5.5pt] font-bold text-slate-600 bg-stone-100 px-1 py-0.5 rounded truncate max-w-[19mm]">${a.category}</span>
                   </div>
-                  <div class="font-bold text-[7.5pt] text-slate-900 line-clamp-1 leading-tight">${a.name}</div>
-                  <div class="grid grid-cols-2 gap-1 text-[6pt] text-slate-600 leading-tight">
+                  <div class="font-bold text-[7pt] text-slate-900 truncate leading-tight">${a.name}</div>
+                  <div class="grid grid-cols-2 gap-1 text-[5.5pt] text-slate-600 leading-tight">
                     <div class="truncate">📍 <span class="font-semibold">${a.location || a.department || '-'}</span></div>
                     <div class="truncate font-mono">S/N: <span class="font-semibold">${a.serial || '-'}</span></div>
                   </div>
                 </div>
-
-                <!-- QR Code Box -->
-                <div class="flex flex-col items-center justify-center shrink-0">
-                  <div id="qr-${a.id}" class="w-[18mm] h-[18mm] bg-white border border-slate-300 rounded p-0.5 flex items-center justify-center"></div>
-                  <span class="text-[5pt] font-bold text-slate-400 mt-0.5">SCAN AUDIT</span>
+                <!-- Clean QR Container with clear Quiet Zone -->
+                <div class="flex flex-col items-center justify-center shrink-0 w-[20mm]">
+                  <div id="qr-${a.id}" class="w-[18mm] h-[18mm] bg-white p-0.5 rounded border border-slate-300 shadow-2xs flex items-center justify-center" title="คลิกเพื่อขยาย QR" onclick="event.stopPropagation(); showZoomQrModal('${a.id}', '${a.name}')"></div>
+                  <span class="text-[5pt] font-mono font-bold text-slate-400 mt-0.5">SCAN AUDIT</span>
                 </div>
               </div>
-
-              <!-- Standard Caution Footer -->
               <div class="border-t border-slate-300 pt-1 flex items-center justify-between text-[5pt] font-bold text-slate-600 leading-none">
                 <span>ทรัพย์สินของกลุ่มบริษัท ห้ามแกะ/ย้ายโดยพลการ</span>
                 <span class="font-mono uppercase">PROPERTY OF CC1971 GROUP</span>
               </div>
             </div>
           `;
-        } 
-        /* -------------------------------------------------------------
-         * 4. INDUSTRIAL SIZE: 80 x 40 mm (QR + Code 128 Barcode)
-         * ------------------------------------------------------------- */
-        else {
+        } else {
           labelInnerHtml = `
             <div id="sticker-card-${a.id}" class="label-size-80x40 bg-white border-2 border-slate-900 p-2 flex flex-col justify-between shadow-xs relative cursor-pointer hover:shadow-md transition ${isSelected ? 'ring-2 ring-brand-500' : ''}" onclick="toggleStickerSelection('${a.id}')">
-              <!-- Header Bar -->
               <div class="flex items-center justify-between border-b border-slate-800 pb-1 leading-none">
-                <div class="flex items-center gap-1.5">
-                  <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-black text-[6.5pt]">CC1971 GROUP</span>
-                  <span class="font-black text-[7pt] text-brand-700 tracking-tight">${compName}</span>
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-black text-[6.5pt] shrink-0">CC1971 GROUP</span>
+                  <span class="font-black text-[7pt] text-brand-700 tracking-tight truncate max-w-[40mm]">${compName}</span>
                 </div>
-                <span class="font-black text-[6.5pt] text-slate-600 font-mono">${a.id}</span>
+                <span class="font-black text-[6.5pt] text-slate-600 font-mono shrink-0">${a.id}</span>
               </div>
-
-              <!-- Center Layout: QR Code + Barcode + Details -->
-              <div class="flex items-center gap-2 my-auto">
-                <div class="flex flex-col items-center shrink-0">
-                  <div id="qr-${a.id}" class="w-[17mm] h-[17mm] bg-white border border-slate-300 rounded p-0.5 flex items-center justify-center"></div>
+              <div class="flex items-center gap-2.5 my-auto overflow-hidden">
+                <div class="flex flex-col items-center shrink-0 w-[19mm]">
+                  <div id="qr-${a.id}" class="w-[18mm] h-[18mm] bg-white p-0.5 rounded border border-slate-300 flex items-center justify-center" title="คลิกเพื่อขยาย QR" onclick="event.stopPropagation(); showZoomQrModal('${a.id}', '${a.name}')"></div>
                 </div>
-
-                <div class="flex-1 min-w-0 text-left">
-                  <div class="font-bold text-[7.5pt] text-slate-900 line-clamp-1 leading-tight">${a.name}</div>
-                  <div class="text-[6pt] text-slate-600 truncate mt-0.5">ผู้ถือครอง: ${a.custodian || '-'} | แผนก: ${a.department || '-'}</div>
-                  <!-- Native SVG Barcode -->
+                <div class="flex-1 min-w-0 text-left overflow-hidden">
+                  <div class="font-bold text-[7.5pt] text-slate-900 truncate leading-tight">${a.name}</div>
+                  <div class="text-[5.5pt] text-slate-600 truncate mt-0.5">ผู้ถือครอง: ${a.custodian || '-'} | แผนก: ${a.department || '-'}</div>
                   <div class="w-full mt-1">
                     <svg id="bc-${a.id}" class="w-full h-6"></svg>
                   </div>
                 </div>
               </div>
-
-              <!-- Industrial Caution Footer -->
               <div class="border-t border-slate-800 pt-0.5 flex items-center justify-between text-[5pt] font-bold text-slate-700 leading-none">
                 <span>⚠️ ทรัพย์สินถาวรของบริษัท ห้ามแกะ ทำลาย หรือเคลื่อนย้ายโดยไม่ได้รับอนุญาต</span>
                 <span class="font-mono">VERIFIED</span>
@@ -3237,23 +3559,30 @@ function writeSheetRows(ss, name, items, headers) {
 
         c.appendChild(wrapper); 
 
-        // Generate QR code and Barcode with crisp low-density matrix
+        // Generate Ultra-Crisp Low-Density Scannable QR Code
         setTimeout(() => { 
           const qE = document.getElementById(`qr-${a.id}`); 
           if (qE) {
             try { 
-              let payloadText = `https://cc1971group.com/asset#asset=${a.id}`;
-              if (payloadMode === 'quickText') payloadText = `CC1971:${a.id}|${a.name}|SN:${a.serial || '-'}|${a.department || '-'}`;
-              if (payloadMode === 'assetCode') payloadText = a.id;
+              qE.innerHTML = '';
+              let payloadText = '';
+              if (payloadMode === 'assetCode') {
+                payloadText = a.id;
+              } else if (payloadMode === 'quickText') {
+                payloadText = `CC1971:${a.id}|${a.name.substring(0, 20)}`;
+              } else {
+                // Smart URL ผสานทั้ง Search Query ?asset= และ Hash Fragment #asset= รับประกันเปิดติดทุกเบราว์เซอร์
+                payloadText = `${cleanBase}?asset=${encodeURIComponent(a.id)}&id=${encodeURIComponent(a.id)}#asset=${encodeURIComponent(a.id)}`;
+              }
 
-              const qrSize = sz === '32x25' ? 44 : (sz === '50x25' ? 52 : (sz === '70x35' ? 68 : 64));
+              // Use Level L (Low error correction) for drastically larger dots and instant camera detection
               new QRCode(qE, { 
                 text: payloadText, 
-                width: qrSize, 
-                height: qrSize, 
+                width: 128, 
+                height: 128, 
                 colorDark: '#000000',
                 colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M 
+                correctLevel: QRCode.CorrectLevel.L 
               }); 
             } catch(e) {} 
           }
@@ -3272,6 +3601,191 @@ function writeSheetRows(ss, name, items, headers) {
           }
         }, 20); 
       }); 
+    }
+    function openPassportModal(id) { 
+      if (!id) return;
+      const a = findAssetById(id);
+      if (!a) {
+        showToast(`ไม่พบข้อมูลสินทรัพย์รหัส "${id}" ในระบบ`, false);
+        return;
+      } 
+      currentActivePassportAssetId = a.id;
+
+      // แสดงหน้าต่าง Modal ทันทีเป็นอันดับแรกเพื่อรับประกันการแสดงผล
+      const modal = document.getElementById('passportModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      try {
+        const comp = companies.find(x => x.id === a.companyId);
+        const dep = calculateTAS16Depreciation(a, 2026);
+        const depreciableBase = Math.max(0, a.cost - a.salvage);
+        const depProgressPct = depreciableBase > 0 ? Math.min(100, Math.round((dep.accumDeprec / depreciableBase) * 100)) : 100;
+
+        const imgEl = document.getElementById('passportImg');
+        if (imgEl) imgEl.src = a.imageUrl || 'https://placehold.co/400'; 
+        
+        const nameEl = document.getElementById('passportName');
+        if (nameEl) nameEl.textContent = a.name; 
+
+        const codeEl = document.getElementById('passportCode');
+        if (codeEl) codeEl.textContent = a.id; 
+
+        const serialEl = document.getElementById('passportSerial');
+        if (serialEl) serialEl.textContent = `S/N: ${a.serial || '-'}`;
+
+        const compEl = document.getElementById('passportCompanyBadge');
+        if (compEl) compEl.textContent = comp ? comp.nameTh : a.companyId;
+
+        const locEl = document.getElementById('passportLocation');
+        if (locEl) locEl.textContent = a.location || '-';
+
+        const deptEl = document.getElementById('passportDepartment');
+        if (deptEl) deptEl.textContent = a.department || '-';
+
+        const custEl = document.getElementById('passportCustodian');
+        if (custEl) custEl.textContent = a.custodian || '-';
+
+        const statBadge = document.getElementById('passportStatusBadge');
+        if (statBadge) {
+          statBadge.textContent = a.status;
+          statBadge.className = 'px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold border ';
+          if (a.status === 'พร้อมใช้') statBadge.className += 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          else if (a.status === 'กำลังใช้งาน') statBadge.className += 'bg-blue-50 text-blue-700 border-blue-200';
+          else if (a.status === 'ส่งซ่อมบำรุง') statBadge.className += 'bg-amber-50 text-amber-700 border-amber-200';
+          else statBadge.className += 'bg-rose-50 text-rose-700 border-rose-200';
+        }
+
+        const now = new Date();
+        const wDateEl = document.getElementById('passportWarrantyDate');
+        const wBadgeEl = document.getElementById('passportWarrantyStatusBadge');
+        if (wDateEl && wBadgeEl) {
+          if (a.warrantyDate) {
+            wDateEl.textContent = a.warrantyDate;
+            const diffDays = Math.ceil((new Date(a.warrantyDate) - now) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) {
+              wBadgeEl.textContent = 'หมดประกันแล้ว';
+              wBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500';
+            } else if (diffDays <= 30) {
+              wBadgeEl.textContent = `ใกล้หมดใน ${diffDays} วัน`;
+              wBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800';
+            } else {
+              wBadgeEl.textContent = 'อยู่ในระยะประกัน';
+              wBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800';
+            }
+          } else {
+            wDateEl.textContent = 'ไม่ระบุ';
+            wBadgeEl.textContent = 'ไม่มีข้อมูล';
+            wBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-stone-100 text-slate-400';
+          }
+        }
+
+        const sDateEl = document.getElementById('passportNextServiceDate');
+        const sBadgeEl = document.getElementById('passportServiceStatusBadge');
+        if (sDateEl && sBadgeEl) {
+          if (a.nextServiceDate) {
+            sDateEl.textContent = a.nextServiceDate;
+            const diffDays = Math.ceil((new Date(a.nextServiceDate) - now) / (1000 * 60 * 60 * 24));
+            if (diffDays <= 0) {
+              sBadgeEl.textContent = 'เลยกำหนดตรวจ';
+              sBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800';
+            } else if (diffDays <= 15) {
+              sBadgeEl.textContent = `ถึงรอบใน ${diffDays} วัน`;
+              sBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800';
+            } else {
+              sBadgeEl.textContent = 'ปกติ';
+              sBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800';
+            }
+          } else {
+            sDateEl.textContent = 'ไม่ระบุ';
+            sBadgeEl.textContent = 'ไม่มีข้อมูล';
+            sBadgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-stone-100 text-slate-400';
+          }
+        }
+
+        const costEl = document.getElementById('passportCost');
+        if (costEl) costEl.textContent = formatCurrency(a.cost); 
+
+        const salvageEl = document.getElementById('passportSalvage');
+        if (salvageEl) salvageEl.textContent = formatCurrency(a.salvage);
+
+        const depEl = document.getElementById('passportAccumDeprec');
+        if (depEl) depEl.textContent = formatCurrency(dep.accumDeprec);
+
+        const nbvEl = document.getElementById('passportNBV');
+        if (nbvEl) nbvEl.textContent = formatCurrency(dep.nbv); 
+
+        const depPctEl = document.getElementById('passportDeprecProgressPct');
+        if (depPctEl) depPctEl.textContent = `${depProgressPct}%`;
+
+        const depBarEl = document.getElementById('passportDeprecProgressBar');
+        if (depBarEl) depBarEl.style.width = `${depProgressPct}%`;
+
+        const acqEl = document.getElementById('passportAcquiredDate');
+        if (acqEl) acqEl.textContent = a.acquiredDate;
+
+        const lifeEl = document.getElementById('passportLifespan');
+        if (lifeEl) lifeEl.textContent = `${a.lifespan} ปี`;
+
+        const annEl = document.getElementById('passportAnnualDeprec');
+        if (annEl) annEl.textContent = formatCurrency(dep.annualDeprec);
+
+        const isAuditedThisYear = a.lastAuditedDate && a.lastAuditedDate.startsWith('2026');
+        const auditStatusEl = document.getElementById('passportAuditStatus');
+        const auditDetailEl = document.getElementById('passportAuditDetail');
+        if (auditStatusEl && auditDetailEl) {
+          if (isAuditedThisYear) {
+            auditStatusEl.textContent = '✅ ตรวจนับสมบูรณ์แล้ว';
+            auditStatusEl.className = 'font-black text-xs text-emerald-600';
+            auditDetailEl.textContent = `วันที่ ${a.lastAuditedDate} โดย ${a.lastAuditor || 'เจ้าหน้าที่'}`;
+          } else {
+            auditStatusEl.textContent = '⏳ ยังไม่ได้ตรวจนับประจำงวด';
+            auditStatusEl.className = 'font-black text-xs text-amber-600';
+            auditDetailEl.textContent = a.lastAuditedDate ? `ตรวจล่าสุดเมื่อ ${a.lastAuditedDate}` : 'ยังไม่มีประวัติตรวจ';
+          }
+        }
+
+        const txBody = document.getElementById('passportTxHistoryBody');
+        if (txBody) {
+          txBody.innerHTML = '';
+          const assetTx = transactions.filter(t => t.assetId === a.id);
+          if (assetTx.length === 0) {
+            txBody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-slate-400">ยังไม่มีประวัติธุรกรรมสำหรับสินทรัพย์ชิ้นนี้</td></tr>`;
+          } else {
+            assetTx.forEach(t => {
+              txBody.innerHTML += `
+                <tr class="hover:bg-stone-50">
+                  <td class="p-2 text-[10px] text-slate-500 font-mono">${t.date}</td>
+                  <td class="p-2 font-bold text-slate-800">${t.type}</td>
+                  <td class="p-2 text-slate-600">${t.details}</td>
+                  <td class="p-2 text-slate-700">${t.person}</td>
+                  <td class="p-2 text-center">
+                    ${t.signatureUrl ? `<img src="${t.signatureUrl}" class="h-6 mx-auto border rounded bg-white" alt="Signature">` : '<span class="text-slate-300">-</span>'}
+                  </td>
+                  <td class="p-2 text-right font-bold">${formatCurrency(t.cost)}</td>
+                </tr>
+              `;
+            });
+          }
+        }
+      } catch(err) {
+        console.warn('Populating passport data warning:', err);
+      }
+    }
+
+    function closePassportModal() { 
+      const modal = document.getElementById('passportModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      currentActivePassportAssetId = null;
+    }
+
+    function closeQrZoomModal() {
+      document.getElementById('qrZoomModal')?.classList.add('hidden');
     }
 
     function cloneCardWithCanvases(originalCard) {
@@ -3307,7 +3821,6 @@ function writeSheetRows(ss, name, items, headers) {
 
       p.innerHTML = ''; 
 
-      // 1-Up Single Thermal Roll Mode (1 label per page)
       if (outputMode === 'thermal') {
         targetAssets.forEach(a => {
           const card = document.getElementById(`sticker-card-${a.id}`);
@@ -3324,9 +3837,7 @@ function writeSheetRows(ss, name, items, headers) {
             p.appendChild(pageWrap);
           }
         });
-      } 
-      // Multi-Label Grid Mode (Print multiple stickers per page / row)
-      else {
+      } else {
         const containerWrap = document.createElement('div');
         if (outputMode === 'cols-2') {
           containerWrap.className = 'print-layout-cols-2';
@@ -3359,59 +3870,651 @@ function writeSheetRows(ss, name, items, headers) {
       setTimeout(() => p.classList.add('hidden'), 500); 
     }
 
+    /* ==========================================================================
+     * COMPREHENSIVE ENTERPRISE FIXED ASSET A4 REPORT ENGINE (8 STANDARD FORMS)
+     * ========================================================================== */
+    function handleReportSelectorChange() {
+      const formType = document.getElementById('officialFormSelector')?.value || 'form-a4-01';
+      const extraContainer = document.getElementById('reportExtraFilterContainer');
+      if (!extraContainer) return;
+      extraContainer.innerHTML = '';
+
+      // Secondary Filters based on report type
+      if (formType === 'form-a4-02') {
+        extraContainer.innerHTML = `
+          <div>
+            <label class="block text-[10.5px] font-black text-slate-500 mb-1">📅 คำนวณ ณ ปีบัญชี:</label>
+            <select id="reportYearSelector" onchange="renderOfficialReportView()" class="p-2 border border-slate-300 rounded-xl text-xs font-bold bg-white text-slate-800">
+              <option value="2024">2024 (2567)</option>
+              <option value="2025">2025 (2568)</option>
+              <option value="2026" selected>2026 (2569 - ปีปัจจุบัน)</option>
+              <option value="2027">2027 (2570)</option>
+              <option value="2028">2028 (2571)</option>
+            </select>
+          </div>
+        `;
+      } else if (formType === 'form-a4-04' || formType === 'form-a4-08') {
+        const scAssets = getScopedAssets();
+        let assetOptions = scAssets.map(a => `<option value="${a.id}">[${a.id}] ${a.name}</option>`).join('');
+        extraContainer.innerHTML = `
+          <div>
+            <label class="block text-[10.5px] font-black text-slate-500 mb-1">🔍 เลือกรายการสินทรัพย์:</label>
+            <select id="reportAssetSelector" onchange="renderOfficialReportView()" class="p-2 border border-slate-300 rounded-xl text-xs font-bold bg-white text-slate-800 max-w-[220px]">
+              ${assetOptions || '<option value="">ไม่มีสินทรัพย์</option>'}
+            </select>
+          </div>
+        `;
+      }
+
+      renderOfficialReportView();
+    }
+
     function renderOfficialReportView() { 
       const c = document.getElementById('officialA4Canvas'); 
       if (!c) return; 
-      const ra = getScopedAssets(); 
-      let tr = '', tC = 0, tN = 0; 
-      ra.forEach((a, i) => { 
-        const d = calculateTAS16Depreciation(a, 2026); 
-        tC += a.cost; 
-        tN += d.nbv; 
-        tr += `<tr class="border-b text-[10pt]"><td class="p-2 text-center">${i + 1}</td><td class="p-2 font-bold text-brand-700">${a.id}</td><td class="p-2">${a.name}</td><td class="p-2 text-center">${a.acquiredDate}</td><td class="p-2 text-right">${formatCurrency(a.cost)}</td><td class="p-2 text-right font-bold text-emerald-700">${formatCurrency(d.nbv)}</td></tr>`; 
-      }); 
-      tr += `<tr class="bg-stone-50 font-black text-[10pt] border-t-2"><td colspan="4" class="p-2 text-right">รวมสุทธิ (${ra.length} รายการ):</td><td class="p-2 text-right">${formatCurrency(tC)}</td><td class="p-2 text-right text-emerald-800">${formatCurrency(tN)}</td></tr>`; 
+
+      const formType = document.getElementById('officialFormSelector')?.value || 'form-a4-01';
+      const selectedCompanyId = document.getElementById('reportCompanySelector')?.value || currentCompanyFilter || 'all';
       
+      // Determine scoped assets for this report
+      const ra = (selectedCompanyId === 'all') ? assets : assets.filter(a => a.companyId === selectedCompanyId);
+      const activeComp = companies.find(x => x.id === selectedCompanyId) || companies[0];
+      const compTitle = (selectedCompanyId === 'all') ? 'กลุ่มบริษัท CC1971GROUP (Consolidated ทั้งหมด)' : `${activeComp.nameTh} (${activeComp.branch || 'สำนักงานใหญ่'})`;
+      const compTax = (selectedCompanyId === 'all') ? 'เลขประจำตัวผู้เสียภาษีรวมกลุ่มบริษัท' : `เลขประจำตัวผู้เสียภาษี: ${activeComp.taxId || '-'}`;
+      const printDateStr = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
       const latestSignatureTx = transactions.find(t => t.signatureUrl);
 
-      c.innerHTML = `
-        <div class="space-y-6">
-          <div class="flex justify-between border-b-2 border-brand-500 pb-4">
-            <div class="flex gap-3 items-center">
-              <div class="w-12 h-12 bg-orange-600 text-white flex items-center justify-center font-black rounded-xl">CC</div>
-              <div><h2 class="font-black text-sm">กลุ่มบริษัท CC1971 GROUP</h2><div class="text-[10px] text-slate-500">รายงานการบริหารสินทรัพย์ถาวร</div></div>
-            </div>
-            <div class="text-[10px] text-right text-slate-500">พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH')}</div>
-          </div>
-          <h3 class="text-center font-black text-base uppercase">ทะเบียนทรัพย์สิน (Fixed Asset Register)</h3>
-          <table class="w-full text-left border"><thead class="bg-stone-100 border-b text-[10pt]"><tr><th class="p-2 text-center">ลำดับ</th><th class="p-2">รหัส</th><th class="p-2">รายการ</th><th class="p-2 text-center">วันที่ได้มา</th><th class="p-2 text-right">ราคาทุน</th><th class="p-2 text-right">NBV</th></tr></thead><tbody>${tr}</tbody></table>
-          
-          <div class="pt-8 border-t flex items-end justify-between text-xs">
-            <div class="text-center space-y-1">
-              <div class="h-14 flex items-center justify-center">
-                ${latestSignatureTx ? `<img src="${latestSignatureTx.signatureUrl}" class="h-12 object-contain" alt="Sign">` : '<div class="w-32 border-b border-dashed border-slate-400"></div>'}
+      // Common Header Template
+      function getHeaderHtml(titleTh, titleEn, docCode) {
+        return `
+          <div class="border-b-2 border-brand-500 pb-3 mb-5">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 bg-gradient-to-br from-brand-500 to-orange-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-md shrink-0">CC</div>
+                <div>
+                  <h2 class="text-sm font-black text-slate-900 tracking-tight uppercase">${compTitle}</h2>
+                  <p class="text-[10px] text-slate-500">${compTax} &bull; ระบบบริหารและจัดการทรัพย์สินถาวร</p>
+                </div>
               </div>
-              <div class="font-bold">(${latestSignatureTx ? latestSignatureTx.person : '...................................'})</div>
-              <div class="text-slate-500 text-[10px]">ผู้ส่งมอบ / ผู้รับผิดชอบงาน</div>
+              <div class="text-right">
+                <span class="px-2.5 py-1 rounded-md bg-stone-100 border border-slate-200 text-[10px] font-mono font-black text-brand-700">${docCode}</span>
+                <p class="text-[9.5px] text-slate-400 mt-1">วันที่ออกเอกสาร: ${printDateStr}</p>
+              </div>
             </div>
-            <div class="text-center space-y-1">
-              <div class="h-14 flex items-center justify-center"><div class="w-32 border-b border-dashed border-slate-400"></div></div>
-              <div class="font-bold">(${currentUser ? currentUser.fullName : '...................................'})</div>
-              <div class="text-slate-500 text-[10px]">ผู้ตรวจสอบ / ฝ่ายบัญชี</div>
-            </div>
-            <div class="text-center space-y-1">
-              <div class="h-14 flex items-center justify-center"><div class="w-32 border-b border-dashed border-slate-400"></div></div>
-              <div class="font-bold">(กรรมการผู้มีอำนาจลงนาม)</div>
-              <div class="text-slate-500 text-[10px]">ผู้อนุมัติรายงาน</div>
+            <div class="text-center mt-3">
+              <h3 class="font-black text-base text-slate-900 tracking-tight">${titleTh}</h3>
+              <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wider">${titleEn}</p>
             </div>
           </div>
-        </div>
-      `; 
+        `;
+      }
+
+      // Common Sign-off 3-tier Template
+      function getSignOffHtml(signatory1Title = 'ผู้ส่งมอบ / ผู้รับผิดชอบ', signatory2Title = 'ผู้ตรวจสอบ / ฝ่ายบัญชี', signatory3Title = 'ผู้อนุมัติ (กรรมการ/ผู้บริหาร)') {
+        return `
+          <div class="mt-8 pt-5 border-t border-slate-200 grid grid-cols-3 gap-4 text-center text-xs">
+            <div class="space-y-1.5 flex flex-col items-center">
+              <div class="h-12 w-full flex items-center justify-center">
+                ${latestSignatureTx?.signatureUrl ? `<img src="${latestSignatureTx.signatureUrl}" class="h-10 object-contain mx-auto" alt="Sign">` : '<div class="w-32 border-b border-dashed border-slate-400"></div>'}
+              </div>
+              <div class="font-bold text-slate-800">(${latestSignatureTx?.person || '...........................................'})</div>
+              <div class="text-[9.5px] text-slate-500">${signatory1Title}</div>
+            </div>
+            <div class="space-y-1.5 flex flex-col items-center">
+              <div class="h-12 w-full flex items-center justify-center">
+                <div class="w-32 border-b border-dashed border-slate-400"></div>
+              </div>
+              <div class="font-bold text-slate-800">(${currentUser?.fullName || '...........................................'})</div>
+              <div class="text-[9.5px] text-slate-500">${signatory2Title}</div>
+            </div>
+            <div class="space-y-1.5 flex flex-col items-center">
+              <div class="h-12 w-full flex items-center justify-center">
+                <div class="w-32 border-b border-dashed border-slate-400"></div>
+              </div>
+              <div class="font-bold text-slate-800">(...........................................)</div>
+              <div class="text-[9.5px] text-slate-500">${signatory3Title}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      let reportContentHtml = '';
+
+      /* -------------------------------------------------------------
+       * 1. A4-01: FIXED ASSET REGISTER (ทะเบียนคุมทรัพย์สินถาวร)
+       * ------------------------------------------------------------- */
+      if (formType === 'form-a4-01') {
+        let rows = '', totalCost = 0, totalNBV = 0;
+        ra.forEach((a, i) => {
+          const d = calculateTAS16Depreciation(a, 2026);
+          totalCost += Number(a.cost || 0);
+          totalNBV += Number(d.nbv || 0);
+          rows += `
+            <tr class="border-b border-slate-200 text-[9pt] hover:bg-stone-50">
+              <td class="p-2 text-center text-slate-400">${i + 1}</td>
+              <td class="p-2 font-mono font-bold text-brand-700">${a.id}</td>
+              <td class="p-2 font-semibold text-slate-900">${a.name}<div class="text-[8pt] text-slate-400 font-mono">SN: ${a.serial || '-'}</div></td>
+              <td class="p-2 text-slate-600">${a.department || a.location || '-'}</td>
+              <td class="p-2 text-slate-700">${a.custodian || '-'}</td>
+              <td class="p-2 text-center text-slate-500 font-mono">${a.acquiredDate}</td>
+              <td class="p-2 text-right font-mono">${formatCurrency(a.cost)}</td>
+              <td class="p-2 text-right font-mono font-bold text-emerald-700">${formatCurrency(d.nbv)}</td>
+              <td class="p-2 text-center"><span class="px-1.5 py-0.5 rounded text-[8pt] font-bold bg-stone-100">${a.status}</span></td>
+            </tr>
+          `;
+        });
+        reportContentHtml = `
+          ${getHeaderHtml('ทะเบียนคุมทรัพย์สินถาวร (Fixed Asset Register)', 'Standard Enterprise Fixed Asset Control Ledger', 'FORM A4-01')}
+          <table class="w-full text-left border border-slate-300 mb-4">
+            <thead class="bg-stone-100 border-b border-slate-300 text-[9pt] font-black text-slate-700">
+              <tr>
+                <th class="p-2 text-center w-8">#</th>
+                <th class="p-2 w-24">รหัส</th>
+                <th class="p-2">รายการทรัพย์สิน</th>
+                <th class="p-2">แผนก/ที่ตั้ง</th>
+                <th class="p-2">ผู้ถือครอง</th>
+                <th class="p-2 text-center w-20">วันที่ได้มา</th>
+                <th class="p-2 text-right w-24">ราคาทุน (Cost)</th>
+                <th class="p-2 text-right w-24">มูลค่าคงเหลือ (NBV)</th>
+                <th class="p-2 text-center w-20">สถานะ</th>
+              </tr>
+            </thead>
+            <tbody>${rows || '<tr><td colspan="9" class="p-6 text-center text-slate-400">ไม่พบรายการสินทรัพย์</td></tr>'}</tbody>
+            <tfoot>
+              <tr class="bg-stone-100 font-black text-[9.5pt] border-t-2 border-slate-300">
+                <td colspan="6" class="p-2.5 text-right text-slate-700">รวมทั้งสิ้น (${ra.length} รายการ):</td>
+                <td class="p-2.5 text-right font-mono text-slate-900">${formatCurrency(totalCost)}</td>
+                <td class="p-2.5 text-right font-mono text-emerald-800">${formatCurrency(totalNBV)}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+          ${getSignOffHtml()}
+        `;
+      }
+
+      /* -------------------------------------------------------------
+       * 2. A4-02: TAS 16 DEPRECIATION SCHEDULE (ตารางคำนวณค่าเสื่อมราคา)
+       * ------------------------------------------------------------- */
+      else if (formType === 'form-a4-02') {
+        const simYear = parseInt(document.getElementById('reportYearSelector')?.value || '2026', 10);
+        let rows = '', tCost = 0, tDepYear = 0, tAccum = 0, tNBV = 0;
+        ra.forEach((a, i) => {
+          const d = calculateTAS16Depreciation(a, simYear);
+          tCost += Number(a.cost || 0);
+          tDepYear += Number(d.annualDeprec || 0);
+          tAccum += Number(d.accumDeprec || 0);
+          tNBV += Number(d.nbv || 0);
+          rows += `
+            <tr class="border-b border-slate-200 text-[9pt]">
+              <td class="p-2 text-center text-slate-400">${i + 1}</td>
+              <td class="p-2 font-mono font-bold text-brand-700">${a.id}</td>
+              <td class="p-2 font-semibold text-slate-900">${a.name}</td>
+              <td class="p-2 text-center font-mono">${a.acquiredDate}</td>
+              <td class="p-2 text-center font-bold">${a.lifespan} ปี</td>
+              <td class="p-2 text-right font-mono">${formatCurrency(a.cost)}</td>
+              <td class="p-2 text-right font-mono text-slate-400">${formatCurrency(a.salvage)}</td>
+              <td class="p-2 text-right font-mono text-amber-700 font-bold">${formatCurrency(d.annualDeprec)}</td>
+              <td class="p-2 text-right font-mono text-amber-800 font-black">${formatCurrency(d.accumDeprec)}</td>
+              <td class="p-2 text-right font-mono text-emerald-700 font-black">${formatCurrency(d.nbv)}</td>
+            </tr>
+          `;
+        });
+        reportContentHtml = `
+          ${getHeaderHtml(`รายงานการคำนวณค่าเสื่อมราคาทางบัญชี ประจำงวดปี ${simYear + 543} (${simYear})`, 'TAS 16 Straight-Line Depreciation & Net Book Value Schedule', 'FORM A4-02')}
+          <div class="mb-3 p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 text-[10px] text-amber-900 flex justify-between items-center">
+            <span><strong>เกณฑ์มาตรฐาน:</strong> วิธีเส้นตรงตามมาตรฐานการบัญชีไทย ฉบับที่ 16 (TAS 16 Property, Plant and Equipment)</span>
+            <span class="font-bold font-mono">Simulated Year: ${simYear}</span>
+          </div>
+          <table class="w-full text-left border border-slate-300 mb-4">
+            <thead class="bg-stone-100 border-b border-slate-300 text-[8.5pt] font-black text-slate-700">
+              <tr>
+                <th class="p-2 text-center w-8">#</th>
+                <th class="p-2 w-20">รหัส</th>
+                <th class="p-2">รายการทรัพย์สิน</th>
+                <th class="p-2 text-center w-20">วันที่ได้มา</th>
+                <th class="p-2 text-center w-14">อายุ</th>
+                <th class="p-2 text-right w-20">ราคาทุน</th>
+                <th class="p-2 text-right w-16">ซาก</th>
+                <th class="p-2 text-right w-20">ค่าเสื่อม/ปี</th>
+                <th class="p-2 text-right w-20">เสื่อมสะสม</th>
+                <th class="p-2 text-right w-24">คงเหลือ (NBV)</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr class="bg-stone-100 font-black text-[9pt] border-t-2 border-slate-300">
+                <td colspan="5" class="p-2.5 text-right text-slate-700">ยอดรวมทั้งสิ้น (${ra.length} รายการ):</td>
+                <td class="p-2.5 text-right font-mono">${formatCurrency(tCost)}</td>
+                <td></td>
+                <td class="p-2.5 text-right font-mono text-amber-700">${formatCurrency(tDepDepYear = tDepYear)}</td>
+                <td class="p-2.5 text-right font-mono text-amber-900">${formatCurrency(tAccum)}</td>
+                <td class="p-2.5 text-right font-mono text-emerald-800">${formatCurrency(tNBV)}</td>
+              </tr>
+            </tfoot>
+          </table>
+          ${getSignOffHtml('ผู้จัดทำบัญชีสินทรัพย์', 'ผู้สอบทานการคำนวณ / สมุห์บัญชี', 'ผู้มีอำนาจลงนามอนุมัติ')}
+        `;
+      }
+
+      /* -------------------------------------------------------------
+       * 3. A4-03: PHYSICAL ASSET AUDIT REPORT (รายงานสรุปการตรวจนับ)
+       * ------------------------------------------------------------- */
+      else if (formType === 'form-a4-03') {
+        let rows = '', auditedCount = 0;
+        ra.forEach((a, i) => {
+          const isAudited = a.lastAuditedDate && a.lastAuditedDate.startsWith('2026');
+          if (isAudited) auditedCount++;
+          rows += `
+            <tr class="border-b border-slate-200 text-[9pt]">
+              <td class="p-2 text-center text-slate-400">${i + 1}</td>
+              <td class="p-2 font-mono font-bold text-brand-700">${a.id}</td>
+              <td class="p-2 font-semibold text-slate-900">${a.name}</td>
+              <td class="p-2 text-slate-600">${a.location || '-'}</td>
+              <td class="p-2 text-slate-700">${a.custodian || '-'}</td>
+              <td class="p-2 text-center font-mono">${a.lastAuditedDate || '-'}</td>
+              <td class="p-2 text-slate-600">${a.lastAuditor || '-'}</td>
+              <td class="p-2 text-center">
+                <span class="px-2 py-0.5 rounded text-[8pt] font-black ${isAudited ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                  ${isAudited ? '✓ ครบถ้วน' : '⏳ รอตรวจ'}
+                </span>
+              </td>
+            </tr>
+          `;
+        });
+        const auditPct = ra.length > 0 ? Math.round((auditedCount / ra.length) * 100) : 0;
+        reportContentHtml = `
+          ${getHeaderHtml('รายงานผลการตรวจสอบและตรวจนับทรัพย์สินถาวรประจำงวด', 'Annual Physical Asset Count & Audit Verification Report', 'FORM A4-03')}
+          <div class="grid grid-cols-3 gap-3 mb-4 text-xs">
+            <div class="p-3 bg-stone-50 border rounded-xl text-center">
+              <span class="text-slate-400 font-bold block text-[10px]">สินทรัพย์ทั้งหมด</span>
+              <span class="font-black text-slate-900 text-base font-mono">${ra.length} รายการ</span>
+            </div>
+            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+              <span class="text-emerald-700 font-bold block text-[10px]">ตรวจพบสมบูรณ์</span>
+              <span class="font-black text-emerald-800 text-base font-mono">${auditedCount} รายการ</span>
+            </div>
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-center">
+              <span class="text-blue-700 font-bold block text-[10px]">อัตราความสำเร็จ</span>
+              <span class="font-black text-blue-800 text-base font-mono">${auditPct}%</span>
+            </div>
+          </div>
+          <table class="w-full text-left border border-slate-300 mb-4">
+            <thead class="bg-stone-100 border-b border-slate-300 text-[9pt] font-black text-slate-700">
+              <tr>
+                <th class="p-2 text-center w-8">#</th>
+                <th class="p-2 w-24">รหัส</th>
+                <th class="p-2">รายการทรัพย์สิน</th>
+                <th class="p-2">สถานที่ตั้งกายภาพ</th>
+                <th class="p-2">ผู้รับผิดชอบ</th>
+                <th class="p-2 text-center w-24">วันที่ตรวจ</th>
+                <th class="p-2 w-28">ผู้ตรวจสอบ</th>
+                <th class="p-2 text-center w-20">ผลการนับ</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          ${getSignOffHtml('เจ้าหน้าที่ผู้ตรวจนับภาคสนาม', 'คณะกรรมการตรวจสอบทรัพย์สิน', 'ผู้ช่วยกรรมการผู้จัดการ')}
+        `;
+      }
+
+      /* -------------------------------------------------------------
+       * 4. A4-04: ASSET CUSTODY & HANDOVER CERTIFICATE (ใบยืม-คืน / ส่งมอบ)
+       * ------------------------------------------------------------- */
+      else if (formType === 'form-a4-04') {
+        const selectedAssetId = document.getElementById('reportAssetSelector')?.value || ra[0]?.id;
+        const targetAsset = ra.find(a => a.id === selectedAssetId) || ra[0];
+        const assetTx = transactions.filter(t => t.assetId === targetAsset?.id);
+        const lastTx = assetTx[0] || { type: 'ยืมใช้งาน/ส่งมอบ', person: targetAsset?.custodian || 'ผู้ถือครอง', date: printDateStr, details: 'ส่งมอบทรัพย์สินเพื่อปฏิบัติหน้าที่ราชการ/งานบริษัท' };
+
+        reportContentHtml = `
+          ${getHeaderHtml('ใบส่งมอบและบันทึกสิทธิ์การถือครองทรัพย์สินถาวร', 'Fixed Asset Handover & Custody Responsibility Slip', 'FORM A4-04')}
+          <div class="p-4 rounded-2xl bg-stone-50 border border-slate-200 mb-5 space-y-3 text-xs">
+            <div class="font-black text-slate-900 border-b pb-1.5 text-sm flex justify-between">
+              <span>ข้อมูลสินทรัพย์ส่งมอบ: [${targetAsset ? targetAsset.id : '-'}]</span>
+              <span class="text-brand-600 font-mono">${targetAsset ? targetAsset.category : ''}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-slate-700">
+              <div><strong>ชื่อรายการ:</strong> ${targetAsset?.name || '-'}</div>
+              <div><strong>หมายเลขเครื่อง (S/N):</strong> ${targetAsset?.serial || '-'}</div>
+              <div><strong>แผนกผู้ใช้งาน:</strong> ${targetAsset?.department || '-'}</div>
+              <div><strong>สถานที่จัดวาง:</strong> ${targetAsset?.location || '-'}</div>
+              <div><strong>ราคาทุนทรัพย์สิน:</strong> ${formatCurrency(targetAsset?.cost || 0)}</div>
+              <div><strong>วันที่ได้มา:</strong> ${targetAsset?.acquiredDate || '-'}</div>
+            </div>
+          </div>
+
+          <div class="border rounded-2xl p-4 bg-white shadow-xs space-y-3 mb-5 text-xs">
+            <h4 class="font-black text-slate-900 text-xs uppercase tracking-wide">ข้อกำหนดและเงื่อนไขความรับผิดชอบของผู้ถือครอง:</h4>
+            <ol class="list-decimal pl-5 space-y-1 text-slate-600 text-[10.5px] leading-relaxed">
+              <li>ผู้ถือครองมีหน้าที่ดูแลรักษาทรัพย์สินนี้ให้อยู่ในสภาพพร้อมใช้งาน ปลอดภัยจากการสูญหายหรือเสียหาย</li>
+              <li>ห้ามเคลื่อนย้าย ส่งมอบต่อให้บุคคลภายนอก หรือนำไปใช้ส่วนตัวโดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร</li>
+              <li>หากเกิดการชำรุด สูญหาย หรือต้องการส่งซ่อมบำรุง ให้แจ้งฝ่ายพัสดุ/ธุรการเพื่อบันทึกธุรกรรมทันที</li>
+              <li>เมื่อพ้นสภาพพนักงาน หรือเปลี่ยนหน้าที่ ต้องส่งมอบทรัพย์สินคืนคลังกลางพร้อมใบตรวจสอบนี้</li>
+            </ol>
+          </div>
+
+          <div class="p-4 bg-orange-50/50 rounded-2xl border border-orange-200 text-xs flex items-center justify-between">
+            <div>
+              <span class="font-bold text-brand-900 block">ผู้รับมอบสิทธิ์ถือครอง:</span>
+              <span class="text-slate-700 font-semibold">${targetAsset?.custodian || lastTx.person} (${targetAsset?.department || '-'})</span>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-brand-900 block">สถานะปัจจุบัน:</span>
+              <span class="font-bold text-emerald-700 font-mono">${targetAsset?.status || 'กำลังใช้งาน'}</span>
+            </div>
+          </div>
+          ${getSignOffHtml('ผู้รับมอบทรัพย์สิน (ผู้ถือครอง)', 'ผู้ส่งมอบ / เจ้าหน้าที่คลังทรัพย์สิน', 'หัวหน้าฝ่าย / ผู้มีอำนาจอนุมัติ')}
+        `;
+      }
+
+      /* -------------------------------------------------------------
+       * 5. A4-05: MAINTENANCE & WARRANTY TRACKER (รายงานสถานะประกันและซ่อม)
+       * ------------------------------------------------------------- */
+      else if (formType === 'form-a4-05') {
+        let rows = '';
+        const now = new Date();
+        ra.forEach((a, i) => {
+          let wStatus = '<span class="text-slate-400">ไม่ระบุ</span>';
+          if (a.warrantyDate) {
+            const wDiff = Math.ceil((new Date(a.warrantyDate) - now) / (1000 * 60 * 60 * 24));
+            if (wDiff < 0) {
+              wStatus = '<span class="text-slate-400 font-bold">หมดประกันแล้ว</span>';
+            } else if (wDiff <= 30) {
+              wStatus = `<span class="text-amber-800 font-black bg-amber-100 px-2 py-0.5 rounded">⚠️ เหลือ ${wDiff} วัน</span>`;
+            } else {
+              wStatus = '<span class="text-emerald-700 font-bold">✓ ในประกัน</span>';
+            }
+          }
+
+          let sStatus = '<span class="text-slate-400">ไม่ระบุ</span>';
+          if (a.nextServiceDate) {
+            const sDiff = Math.ceil((new Date(a.nextServiceDate) - now) / (1000 * 60 * 60 * 24));
+            if (sDiff <= 0) {
+              sStatus = '<span class="text-rose-800 font-black bg-rose-100 px-2 py-0.5 rounded">🔴 เลยกำหนด</span>';
+            } else if (sDiff <= 15) {
+              sStatus = `<span class="text-amber-800 font-black bg-amber-100 px-2 py-0.5 rounded">🛠️ อีก ${sDiff} วัน</span>`;
+            } else {
+              sStatus = '<span class="text-slate-700 font-bold">ปกติ</span>';
+            }
+          }
+
+          rows += `
+            <tr class="border-b border-slate-200 text-[9pt]">
+              <td class="p-2 text-center text-slate-400">${i + 1}</td>
+              <td class="p-2 font-mono font-bold text-brand-700">${a.id}</td>
+              <td class="p-2 font-semibold text-slate-900">${a.name}<div class="text-[8pt] text-slate-400 font-mono">SN: ${a.serial || '-'}</div></td>
+              <td class="p-2 text-slate-700">${a.custodian || '-'}</td>
+              <td class="p-2 text-center font-mono">${a.warrantyDate || '-'}</td>
+              <td class="p-2 text-center">${wStatus}</td>
+              <td class="p-2 text-center font-mono">${a.nextServiceDate || '-'}</td>
+              <td class="p-2 text-center">${sStatus}</td>
+            </tr>
+          `;
+        });
+
+        reportContentHtml = `
+          ${getHeaderHtml('รายงานสถานะการรับประกันและรอบการบำรุงรักษาเชิงป้องกัน', 'Preventive Maintenance & Warranty Expiration Tracker Report', 'FORM A4-05')}
+          <table class="w-full text-left border border-slate-300 mb-4">
+            <thead class="bg-stone-100 border-b border-slate-300 text-[9pt] font-black text-slate-700">
+              <tr>
+                <th class="p-2 text-center w-8">#</th>
+                <th class="p-2 w-20">รหัส</th>
+                <th class="p-2">รายการทรัพย์สิน</th>
+                <th class="p-2">ผู้ถือครอง</th>
+                <th class="p-2 text-center w-24">วันหมดประกัน</th>
+                <th class="p-2 text-center w-24">สถานะประกัน</th>
+                <th class="p-2 text-center w-24">รอบเช็คถัดไป</th>
+                <th class="p-2 text-center w-24">สถานะซ่อมบำรุง</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          ${getSignOffHtml('เจ้าหน้าที่ฝ่ายเทคนิค/อาคาร', 'ผู้จัดการแผนกจัดซื้อและบำรุงรักษา', 'ผู้อนุมัติ')}
+        `;
+      }
+
+      /* -------------------------------------------------------------
+       * 6. A4-06: ASSET DISPOSAL CERTIFICATE (ใบรับรองการตัดจำหน่าย TAS 16)
+       * ------------------------------------------------------------- */
+      else if (formType === 'form-a4-06') {
+        const disposedAssets = ra.filter(a => a.status === 'ตัดจำหน่าย');
+        let rows = '', totalCost = 0, totalNBV = 0;
+        const targetList = (disposedAssets.length > 0) ? disposedAssets : ra.slice(0, 3); // Preview fallback
+
+        targetList.forEach((a, i) => {
+          const d = calculateTAS16Depreciation(a, 2026);
+          totalCost += Number(a.cost || 0);
+          totalNBV += Number(d.nbv || 0);
+          rows += `
+            <tr class="border-b border-slate-200 text-[9pt]">
+              <td class="p-2 text-center text-slate-400">${i + 1}</td>
+              <td class="p-2 font-mono font-bold text-brand-700">${a.id}</td>
+              <td class="p-2 font-semibold text-slate-900">${a.name}<div class="text-[8pt] text-slate-400 font-mono">SN: ${a.serial || '-'}</div></td>
+              <td class="p-2 text-center font-mono">${a.acquiredDate}</td>
+              <td class="p-2 text-right font-mono">${formatCurrency(a.cost)}</td>
+              <td class="p-2 text-right font-mono text-amber-800 font-bold">${formatCurrency(d.accumDeprec)}</td>
+              <td class="p-2 text-right font-mono text-rose-700 font-bold">${formatCurrency(d.nbv)}</td>
+              <td class="p-2 text-center text-slate-600 text-[8pt]">ชำรุดซ่อมไม่คุ้ม / ขายซาก</td>
+            </tr>
+          `;
+        });
+
+        reportContentHtml = `
+          ${getHeaderHtml('ใบขออนุมัติและรับรองการตัดจำหน่ายสินทรัพย์ถาวร (TAS 16)', 'Certificate of Fixed Asset De-recognition & Write-Off', 'FORM A4-06')}
+          <div class="mb-4 p-3 rounded-2xl bg-rose-50/80 border border-rose-200 text-[10.5px] text-rose-950 leading-relaxed">
+            <strong>วัตถุประสงค์ทางบัญชี:</strong> เพื่อตัดรายการสินทรัพย์ถาวรออกจากงบแสดงฐานะการเงิน และรับรู้ผลกำไร/ขาดทุนจากการตัดจำหน่ายตามมาตรฐานการบัญชีไทย ฉบับที่ 16 (TAS 16)
+          </div>
+          <table class="w-full text-left border border-slate-300 mb-4">
+            <thead class="bg-stone-100 border-b border-slate-300 text-[9pt] font-black text-slate-700">
+              <tr>
+                <th class="p-2 text-center w-8">#</th>
+                <th class="p-2 w-20">รหัส</th>
+                <th class="p-2">รายการทรัพย์สิน</th>
+                <th class="p-2 text-center w-20">วันที่ได้มา</th>
+                <th class="p-2 text-right w-24">ราคาทุนเดิม</th>
+                <th class="p-2 text-right w-24">เสื่อมราคาสะสม</th>
+                <th class="p-2 text-right w-24">มูลค่าคงเหลือ (NBV)</th>
+                <th class="p-2 text-center w-28">เหตุผลการตัดจำหน่าย</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr class="bg-stone-100 font-black text-[9pt] border-t-2 border-slate-300">
+                <td colspan="4" class="p-2 text-right text-slate-700">รวมมูลค่าสินทรัพย์ตัดจำหน่าย:</td>
+                <td class="p-2 text-right font-mono">${formatCurrency(totalCost)}</td>
+                <td></td>
+                <td class="p-2 text-right font-mono text-rose-800">${formatCurrency(totalNBV)}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+          ${getSignOffHtml('ผู้เสนอขอตัดจำหน่าย / หัวหน้าแผนก', 'ผู้สอบทานทางบัญชีและภาษี', 'กรรมการผู้จัดการ (ผู้อนุมัติตัดจำหน่าย)')}
+        `;
+      }
+
+      /* -------------------------------------------------------------
+       * 7. A4-07: CONSOLIDATED EXECUTIVE VALUATION (สรุปมูลค่าพอร์ตกลุ่มบริษัท)
+       * ------------------------------------------------------------- */
+      else if (formType === 'form-a4-07') {
+        let compRows = '', gCount = 0, gCost = 0, gDeprec = 0, gNBV = 0;
+        companies.forEach((cp, idx) => {
+          const compAssets = assets.filter(a => a.companyId === cp.id);
+          let cCost = 0, cDeprec = 0, cNBV = 0;
+          compAssets.forEach(a => {
+            cCost += Number(a.cost || 0);
+            const dep = calculateTAS16Depreciation(a, 2026);
+            cDeprec += Number(dep.accumDeprec || 0);
+            cNBV += Number(dep.nbv || 0);
+          });
+          gCount += compAssets.length;
+          gCost += cCost;
+          gDeprec += cDeprec;
+          gNBV += cNBV;
+          compRows += `
+            <tr class="border-b border-slate-200 text-[9.5pt]">
+              <td class="p-2.5 text-center text-slate-400">${idx + 1}</td>
+              <td class="p-2.5 font-bold text-slate-900">${cp.nameTh} <span class="text-[8.5pt] text-slate-500 block font-mono">ID: ${cp.id} &bull; Tax: ${cp.taxId}</span></td>
+              <td class="p-2.5 text-center font-mono font-bold">${compAssets.length}</td>
+              <td class="p-2.5 text-right font-mono font-bold text-blue-900">${formatCurrency(cCost)}</td>
+              <td class="p-2.5 text-right font-mono text-amber-700">${formatCurrency(cDeprec)}</td>
+              <td class="p-2.5 text-right font-mono font-black text-emerald-700">${formatCurrency(cNBV)}</td>
+              <td class="p-2.5 text-center font-mono font-bold text-slate-600">${gCost > 0 ? Math.round((cCost / gCost) * 100) : 0}%</td>
+            </tr>
+          `;
+        });
+
+        reportContentHtml = `
+          ${getHeaderHtml('รายงานสรุปภาพรวมและมูลค่าสินทรัพย์ถาวรกลุ่มบริษัท CC1971GROUP', 'Executive Consolidated Fixed Asset Portfolio & Valuation Report', 'FORM A4-07')}
+          <div class="grid grid-cols-4 gap-3 mb-5 text-center text-xs">
+            <div class="p-3 bg-stone-50 border rounded-2xl">
+              <span class="text-[10px] text-slate-400 font-bold block">จำนวนทรัพย์สินทั้งสิ้น</span>
+              <span class="text-base font-black text-slate-900 font-mono mt-0.5 block">${gCount} รายการ</span>
+            </div>
+            <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-2xl">
+              <span class="text-[10px] text-blue-800 font-bold block">ราคาทุนรวม (Cost)</span>
+              <span class="text-base font-black text-blue-900 font-mono mt-0.5 block">${formatCurrency(gCost)}</span>
+            </div>
+            <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-2xl">
+              <span class="text-[10px] text-amber-800 font-bold block">ตัดค่าเสื่อมสะสม (TAS 16)</span>
+              <span class="text-base font-black text-amber-800 font-mono mt-0.5 block">${formatCurrency(gDeprec)}</span>
+            </div>
+            <div class="p-3 bg-emerald-50/70 border border-emerald-200 rounded-2xl">
+              <span class="text-[10px] text-emerald-800 font-bold block">มูลค่าคงเหลือสุทธิ (NBV)</span>
+              <span class="text-base font-black text-emerald-700 font-mono mt-0.5 block">${formatCurrency(gNBV)}</span>
+            </div>
+          </div>
+
+          <table class="w-full text-left border border-slate-300 mb-5">
+            <thead class="bg-stone-100 border-b border-slate-300 text-[9pt] font-black text-slate-700">
+              <tr>
+                <th class="p-2.5 text-center w-8">#</th>
+                <th class="p-2.5">บริษัทในเครือ (Entity)</th>
+                <th class="p-2.5 text-center w-20">รายการ</th>
+                <th class="p-2.5 text-right w-28">ราคาทุน (Cost)</th>
+                <th class="p-2.5 text-right w-28">ค่าเสื่อมสะสม</th>
+                <th class="p-2.5 text-right w-32">มูลค่าคงเหลือ (NBV)</th>
+                <th class="p-2.5 text-center w-16">สัดส่วน</th>
+              </tr>
+            </thead>
+            <tbody>${compRows}</tbody>
+            <tfoot>
+              <tr class="bg-stone-100 font-black text-[10pt] border-t-2 border-slate-300">
+                <td colspan="2" class="p-3 text-right text-slate-800">รวมสุทธิกลุ่มบริษัท:</td>
+                <td class="p-3 text-center font-mono">${gCount}</td>
+                <td class="p-3 text-right font-mono text-blue-900">${formatCurrency(gCost)}</td>
+                <td class="p-3 text-right font-mono text-amber-700">${formatCurrency(gDeprec)}</td>
+                <td class="p-3 text-right font-mono text-emerald-800">${formatCurrency(gNBV)}</td>
+                <td class="p-3 text-center font-mono">100%</td>
+              </tr>
+            </tfoot>
+          </table>
+          ${getSignOffHtml('ผู้อำนวยการฝ่ายการเงินและบัญชี', 'ผู้ช่วยกรรมการผู้จัดการใหญ่', 'ประธานเจ้าหน้าที่บริหาร (CEO)')}
+        `;
+      }
+
+      /* -------------------------------------------------------------
+       * 8. A4-08: SINGLE ASSET PASSPORT SPEC SHEET (บัตรประวัติทรัพย์สินรายชิ้น)
+       * ------------------------------------------------------------- */
+      else if (formType === 'form-a4-08') {
+        const selectedAssetId = document.getElementById('reportAssetSelector')?.value || ra[0]?.id;
+        const targetAsset = ra.find(a => a.id === selectedAssetId) || ra[0];
+        const dep = calculateTAS16Depreciation(targetAsset || {}, 2026);
+        const comp = companies.find(x => x.id === targetAsset?.companyId);
+
+        reportContentHtml = `
+          ${getHeaderHtml('บัตรประวัติและทะเบียนควบคุมสินทรัพย์รายชิ้น', 'Individual Capital Asset Specification & Passport Sheet', 'FORM A4-08')}
+          <div class="grid grid-cols-3 gap-5 mb-5">
+            <div class="col-span-1 flex flex-col items-center">
+              <div class="w-full aspect-square bg-stone-100 rounded-2xl border-2 border-slate-300 overflow-hidden shadow-xs flex items-center justify-center p-1">
+                <img src="${targetAsset?.imageUrl || 'https://placehold.co/400'}" class="w-full h-full object-cover rounded-xl" alt="Asset Photo">
+              </div>
+              <div class="mt-3 p-2 bg-white border border-slate-300 rounded-xl flex items-center justify-center" id="a4QrHolder-${targetAsset?.id}"></div>
+              <span class="text-[9px] text-slate-400 font-mono mt-1">SCAN FOR DIGITAL PASSPORT</span>
+            </div>
+
+            <div class="col-span-2 space-y-3 text-xs">
+              <div class="flex items-center justify-between border-b pb-2">
+                <div>
+                  <span class="px-2.5 py-0.5 rounded-lg bg-orange-100 text-brand-700 font-mono font-black text-sm">${targetAsset?.id || '-'}</span>
+                  <span class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold border ${targetAsset?.status === 'พร้อมใช้' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">${targetAsset?.status || '-'}</span>
+                </div>
+                <span class="text-[11px] font-bold text-slate-500">${comp ? comp.nameTh : ''}</span>
+              </div>
+
+              <h4 class="text-base font-black text-slate-900">${targetAsset?.name || '-'}</h4>
+
+              <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-slate-700 text-[11px] bg-stone-50 p-3 rounded-xl border border-slate-200">
+                <div><strong>หมวดหมู่:</strong> ${targetAsset?.category || '-'}</div>
+                <div><strong>Serial Number:</strong> <span class="font-mono">${targetAsset?.serial || '-'}</span></div>
+                <div><strong>แผนกใช้งาน:</strong> ${targetAsset?.department || '-'}</div>
+                <div><strong>สถานที่จัดวาง:</strong> ${targetAsset?.location || '-'}</div>
+                <div><strong>ผู้ถือครอง:</strong> ${targetAsset?.custodian || '-'}</div>
+                <div><strong>วันที่ได้มา:</strong> ${targetAsset?.acquiredDate || '-'}</div>
+                <div><strong>วันหมดประกัน:</strong> ${targetAsset?.warrantyDate || '-'}</div>
+                <div><strong>รอบเช็คสภาพ:</strong> ${targetAsset?.nextServiceDate || '-'}</div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                <div class="p-2 rounded-xl bg-blue-50/70 border border-blue-200">
+                  <span class="text-[9.5px] font-bold text-blue-800 block">ราคาทุนตั้งต้น (Cost)</span>
+                  <span class="font-mono font-black text-blue-900 text-xs mt-0.5 block">${formatCurrency(targetAsset?.cost || 0)}</span>
+                </div>
+                <div class="p-2 rounded-xl bg-amber-50/70 border border-amber-200">
+                  <span class="text-[9.5px] font-bold text-amber-800 block">ตัดค่าเสื่อมสะสม</span>
+                  <span class="font-mono font-black text-amber-800 text-xs mt-0.5 block">${formatCurrency(dep.accumDeprec)}</span>
+                </div>
+                <div class="p-2 rounded-xl bg-emerald-50/70 border border-emerald-200">
+                  <span class="text-[9.5px] font-bold text-emerald-800 block">มูลค่าคงเหลือ (NBV)</span>
+                  <span class="font-mono font-black text-emerald-700 text-xs mt-0.5 block">${formatCurrency(dep.nbv)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 mb-4">
+            <h5 class="font-black text-xs text-slate-900">ประวัติธุรกรรมและการบำรุงรักษาล่าสุด:</h5>
+            <table class="w-full text-left border border-slate-300 text-xs">
+              <thead class="bg-stone-100 border-b text-[8.5pt] font-black text-slate-700">
+                <tr><th class="p-2">วันที่</th><th class="p-2">ประเภท</th><th class="p-2">รายละเอียด</th><th class="p-2">ผู้ดำเนินการ</th><th class="p-2 text-right">ค่าใช้จ่าย</th></tr>
+              </thead>
+              <tbody class="divide-y text-[8.5pt]">
+                ${(transactions.filter(t => t.assetId === targetAsset?.id).length > 0) 
+                  ? transactions.filter(t => t.assetId === targetAsset?.id).map(t => `
+                      <tr><td class="p-2 font-mono">${t.date}</td><td class="p-2 font-bold">${t.type}</td><td class="p-2">${t.details}</td><td class="p-2">${t.person}</td><td class="p-2 text-right font-mono">${formatCurrency(t.cost)}</td></tr>
+                    `).join('') 
+                  : '<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีประวัติธุรกรรมบันทึกไว้</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+          ${getSignOffHtml('ผู้ถือครองทรัพย์สิน', 'เจ้าหน้าที่ทะเบียนพัสดุ', 'หัวหน้างาน')}
+        `;
+
+        setTimeout(() => {
+          const qrBox = document.getElementById(`a4QrHolder-${targetAsset?.id}`);
+          if (qrBox && targetAsset) {
+            qrBox.innerHTML = '';
+            qrBox.className = 'w-[22mm] h-[22mm] bg-white mx-auto p-1 flex items-center justify-center border border-slate-300 rounded';
+            const cleanBase = getCleanBaseAssetUrl();
+            new QRCode(qrBox, {
+              text: `${cleanBase}#${targetAsset.id}`,
+              width: 140,
+              height: 140,
+              colorDark: '#000000',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.L
+            });
+          }
+        }, 30);
+      }
+
+      c.innerHTML = reportContentHtml;
     }
 
     function executePrintOfficialReport() { 
       const p = document.getElementById('printContainer'), 
             c = document.getElementById('officialA4Canvas'); 
+      if (!p || !c) return;
       p.innerHTML = ''; 
       const cl = c.cloneNode(true); 
       cl.className = 'w-[210mm] min-h-[297mm] p-10 bg-white'; 
@@ -3457,10 +4560,32 @@ function writeSheetRows(ss, name, items, headers) {
       if (cG) { 
         cG.innerHTML = ''; 
         companies.forEach(c => { 
+          const compAssetCount = assets.filter(a => a.companyId === c.id).length;
           cG.innerHTML += `
-            <div class="bg-white p-4 border border-orange-100 rounded-2xl shadow-xs flex justify-between items-center">
-              <div><div class="font-bold text-sm text-slate-900">${c.nameTh}</div><div class="text-[11px] text-slate-500">${c.branch} &bull; Tax: ${c.taxId}</div></div>
-              <button onclick="openEditCompanyModal('${c.id}')" class="text-xs bg-orange-50 hover:bg-orange-100 text-brand-700 font-bold px-3 py-1.5 rounded-xl transition">แก้ไข</button>
+            <div class="bg-white p-5 border border-stone-200 rounded-3xl shadow-sm hover:shadow-md transition flex flex-col justify-between gap-3 relative">
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-1.5">
+                  <span class="px-2.5 py-0.5 rounded-lg bg-orange-100 text-brand-700 font-mono font-black text-xs">${c.id}</span>
+                  ${c.isHeadquarters ? '<span class="px-2 py-0.5 rounded-md bg-navy-100 text-navy-800 text-[10px] font-black border border-navy-200">สำนักงานใหญ่</span>' : ''}
+                </div>
+                <h5 class="font-black text-sm text-slate-900 leading-snug">${c.nameTh}</h5>
+                <p class="text-[11px] text-slate-400 font-medium">${c.nameEn || '-'}</p>
+                
+                <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600 space-y-1">
+                  <div>🏢 <strong>สาขา:</strong> ${c.branch || 'สำนักงานใหญ่'}</div>
+                  <div>📄 <strong>Tax ID:</strong> <span class="font-mono">${c.taxId || '-'}</span></div>
+                  <div>📞 <strong>เบอร์โทร:</strong> ${c.phone || '-'}</div>
+                  <div class="truncate">📍 <strong>ที่อยู่:</strong> ${c.address || '-'}</div>
+                </div>
+              </div>
+
+              <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10.5px] font-bold text-slate-500">สินทรัพย์: <strong class="text-brand-600 font-mono font-black">${compAssetCount}</strong> รายการ</span>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="openEditCompanyModal('${c.id}')" class="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-orange-100 text-slate-700 hover:text-brand-800 font-bold text-xs transition">✏️ แก้ไข</button>
+                  <button onclick="handleDeleteCompany('${c.id}')" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition" title="ลบบริษัท">🗑️</button>
+                </div>
+              </div>
             </div>
           `; 
         }); 
@@ -3502,32 +4627,104 @@ function writeSheetRows(ss, name, items, headers) {
       document.getElementById(`settingsPanel-${id}`)?.classList.remove('hidden'); 
     }
 
+    /* ==========================================================================
+     * FULL FUNCTIONAL COMPANY MANAGEMENT (เพิ่ม/แก้ไข/ลบบริษัท และซิงค์จริง)
+     * ========================================================================== */
     function openAddCompanyModal() { 
-      document.getElementById('companyFormId').value = ''; 
+      document.getElementById('companyFormOriginalId').value = ''; 
+      document.getElementById('companyFormIdInput').value = ''; 
+      document.getElementById('companyFormIdInput').readOnly = false;
+      document.getElementById('companyFormNameTh').value = ''; 
+      document.getElementById('companyFormNameEn').value = ''; 
+      document.getElementById('companyFormTaxId').value = ''; 
+      document.getElementById('companyFormBranch').value = 'สำนักงานใหญ่'; 
+      document.getElementById('companyFormAddress').value = ''; 
+      document.getElementById('companyFormPhone').value = ''; 
+      document.getElementById('companyLogoUrlInput').value = ''; 
+      document.getElementById('companyFormIsHq').checked = false; 
+      document.getElementById('companyModalTitle').textContent = 'เพิ่มบริษัทใหม่ในเครือ CC1971GROUP';
       document.getElementById('companyModal').classList.remove('hidden'); 
     }
+
     function openEditCompanyModal(id) { 
       const c = companies.find(x => x.id === id); 
       if (c) { 
-        document.getElementById('companyFormId').value = c.id; 
-        document.getElementById('companyFormNameTh').value = c.nameTh; 
-        document.getElementById('companyFormTaxId').value = c.taxId; 
+        document.getElementById('companyFormOriginalId').value = c.id; 
+        document.getElementById('companyFormIdInput').value = c.id; 
+        document.getElementById('companyFormIdInput').readOnly = true; // Protect ID on edit
+        document.getElementById('companyFormNameTh').value = c.nameTh || ''; 
+        document.getElementById('companyFormNameEn').value = c.nameEn || ''; 
+        document.getElementById('companyFormTaxId').value = c.taxId || ''; 
+        document.getElementById('companyFormBranch').value = c.branch || ''; 
+        document.getElementById('companyFormAddress').value = c.address || ''; 
+        document.getElementById('companyFormPhone').value = c.phone || ''; 
+        document.getElementById('companyLogoUrlInput').value = c.logoUrl || ''; 
+        document.getElementById('companyFormIsHq').checked = !!c.isHeadquarters; 
+        document.getElementById('companyModalTitle').textContent = `แก้ไขข้อมูลบริษัท [${c.id}]`;
         document.getElementById('companyModal').classList.remove('hidden'); 
       } 
     }
+
     function closeCompanyModal() { 
       document.getElementById('companyModal').classList.add('hidden'); 
     }
-    function handleSaveCompany(e) { 
+
+    async function handleSaveCompany(e) { 
       e.preventDefault(); 
-      const id = document.getElementById('companyFormId').value, 
-            d = { nameTh: document.getElementById('companyFormNameTh').value, taxId: document.getElementById('companyFormTaxId').value }; 
-      if (id) Object.assign(companies.find(c => c.id === id), d); 
-      else companies.push({ id: 'CC-SUB-' + Date.now(), ...d }); 
+      const origId = document.getElementById('companyFormOriginalId').value.trim();
+      const codeId = document.getElementById('companyFormIdInput').value.trim().toUpperCase();
+
+      if (!origId && companies.some(c => c.id.toLowerCase() === codeId.toLowerCase())) {
+        return showToast('รหัสย่อบริษัทนี้มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น', false);
+      }
+
+      const companyData = {
+        id: codeId,
+        nameTh: document.getElementById('companyFormNameTh').value.trim(),
+        nameEn: document.getElementById('companyFormNameEn').value.trim(),
+        taxId: document.getElementById('companyFormTaxId').value.trim(),
+        branch: document.getElementById('companyFormBranch').value.trim(),
+        address: document.getElementById('companyFormAddress').value.trim(),
+        phone: document.getElementById('companyFormPhone').value.trim(),
+        logoUrl: document.getElementById('companyLogoUrlInput').value.trim(),
+        isHeadquarters: document.getElementById('companyFormIsHq').checked
+      };
+
+      if (origId) {
+        const idx = companies.findIndex(c => c.id === origId);
+        if (idx !== -1) companies[idx] = { ...companies[idx], ...companyData };
+      } else {
+        companies.push(companyData);
+      }
+
       closeCompanyModal(); 
       renderSettingsView(); 
       populateCompanySelectors(); 
-      silentAutoSync(); 
+      refreshActiveView();
+      showToast(`⚡ บันทึกข้อมูลบริษัท [${codeId}] และกำลังซิงค์เข้า Google Sheets...`);
+      await silentAutoSync(); 
+      showToast(`✅ ข้อมูลบริษัท [${codeId}] บันทึกและซิงค์เรียบร้อยแล้ว!`);
+    }
+
+    async function handleDeleteCompany(id) {
+      if (companies.length <= 1) {
+        return showToast('ไม่สามารถลบบริษัทได้ เนื่องจากต้องมีบริษัทในเครืออย่างน้อย 1 แห่ง', false);
+      }
+
+      const linkedAssets = assets.filter(a => a.companyId === id);
+      if (linkedAssets.length > 0) {
+        return showToast(`ไม่สามารถลบได้! มีสินทรัพย์ ${linkedAssets.length} รายการสังกัดบริษัทนี้อยู่ กรุณาย้ายสังกัดก่อน`, false);
+      }
+
+      showCustomConfirm('ยืนยันลบบริษัท', `คุณแน่ใจหรือไม่ว่าต้องการลบบริษัทรหัส [${id}] ออกจากระบบและ Google Sheets?`, async () => {
+        companies = companies.filter(c => c.id !== id);
+        renderSettingsView();
+        populateCompanySelectors();
+        refreshActiveView();
+        showToast(`⚡ กำลังลบบริษัท [${id}]...`);
+        await silentAutoSync();
+        showToast(`✅ ลบบริษัท [${id}] เรียบร้อยแล้ว`);
+      });
     }
 
     function openAddUserModal() { 
@@ -3548,18 +4745,22 @@ function writeSheetRows(ss, name, items, headers) {
     }
     function handleSaveUser(e) { 
       e.preventDefault(); 
-      const id = document.getElementById('userFormId').value, 
-            d = { 
-              fullName: document.getElementById('userFormFullName').value, 
-              username: document.getElementById('userFormUsername').value, 
-              role: document.getElementById('userFormRole').value, 
-              companyId: document.getElementById('userFormCompanyId').value, 
-              password: document.getElementById('userFormPassword').value 
-            }; 
-      if (id) Object.assign(users.find(u => u.id === id), d); 
-      else users.push({ id: 'USR-' + Date.now(), ...d }); 
+      const id = document.getElementById('userFormId').value;
+      const d = { 
+        fullName: document.getElementById('userFormFullName').value, 
+        username: document.getElementById('userFormUsername').value, 
+        role: document.getElementById('userFormRole').value, 
+        companyId: document.getElementById('userFormCompanyId').value, 
+        password: document.getElementById('userFormPassword').value 
+      }; 
+      if (id) {
+        Object.assign(users.find(u => u.id === id), d); 
+      } else {
+        users.push({ id: 'USR-' + Date.now(), ...d }); 
+      }
       closeUserModal(); 
       renderSettingsView(); 
+      showToast('⚡ บันทึกข้อมูลผู้ใช้เรียบร้อย');
       silentAutoSync(); 
     }
 
@@ -3694,17 +4895,43 @@ function writeSheetRows(ss, name, items, headers) {
     }
 
     function handleInitialDeepLink() { 
-      if (window.location.hash) { 
-        if (window.location.hash.includes('executive')) {
-          setTimeout(() => openExecutiveFullScreen(), 200); 
-        } else if (window.location.hash.includes('asset=')) { 
-          const c = window.location.hash.split('asset=')[1]; 
-          setTimeout(() => { 
-            const m = assets.find(a => a.id.toLowerCase() === c.toLowerCase()); 
-            if (m) openPassportModal(m.id); 
-          }, 500); 
-        } 
+      if (window.location.hash && window.location.hash.includes('executive')) {
+        setTimeout(() => openExecutiveFullScreen(), 100); 
+        return;
       } 
+
+      const targetId = extractAssetCodeFromUrl(window.location.href) || 
+                       extractAssetCodeFromUrl(window.location.search) || 
+                       extractAssetCodeFromUrl(window.location.hash);
+
+      if (!targetId || targetId === 'executive' || targetId === 'dashboard') {
+        return;
+      }
+
+      // 1. ตรวจจับและเปิดบัตรทันทีหากมีข้อมูลอยู่แล้ว
+      if (attemptOpenPassport(targetId)) {
+        return;
+      }
+
+      // 2. หากยังไม่พบ อาจกำลังรอ Hydrate ข้อมูล ให้หน่วงเวลาลองใหม่สั้นๆ
+      [100, 350, 800, 1500].forEach(delay => {
+        setTimeout(() => {
+          if (!currentActivePassportAssetId) {
+            attemptOpenPassport(targetId);
+          }
+        }, delay);
+      });
+
+      // 3. หากมี Google Sheets ให้สั่งดึงข้อมูลล่าสุดมาจับคู่ทันที
+      if (googleSheetConfig.webAppUrl) {
+        pullDataFromGoogleSheets().then(() => {
+          if (!currentActivePassportAssetId) {
+            if (!attemptOpenPassport(targetId)) {
+              showToast(`ไม่พบรหัสทรัพย์สิน "${targetId}" ในระบบ`, false);
+            }
+          }
+        });
+      }
     }
 
     function refreshActiveView() {
@@ -3728,8 +4955,20 @@ function writeSheetRows(ss, name, items, headers) {
       }
       populateCompanySelectors();
       switchTab('dashboard');
+      
+      // ดักจับ Deep Link ทันที
       handleInitialDeepLink();
+      window.addEventListener('hashchange', handleInitialDeepLink);
+      window.addEventListener('popstate', handleInitialDeepLink);
+
+      // ดึงข้อมูลล่าสุดจาก Google Sheets ทันทีเมื่อโหลดหน้าเว็บ
+      if (googleSheetConfig.webAppUrl && googleSheetConfig.autoSync) {
+        setTimeout(() => pullDataFromGoogleSheets(), 800);
+      }
     };
+
+    // ตรวจสอบ Deep Link ทันทีเมื่อ DOM พร้อม
+    document.addEventListener('DOMContentLoaded', handleInitialDeepLink);
   </script>
 </body>
 </html>
