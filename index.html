@@ -8,22 +8,22 @@
   <!-- Google Fonts: Sarabun -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Chart.js for Visualizations -->
+  <!-- Chart.js for Business Visualizations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   
-  <!-- SheetJS (xlsx) for Excel & CSV -->
+  <!-- SheetJS (xlsx) for Excel (.xlsx/.xls) & CSV Parsing & Exporting -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  <!-- QRCode.js and JsBarcode -->
+  <!-- QRCode.js and JsBarcode for physical asset labeling -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   
-  <!-- Html5Qrcode for Camera Scanning -->
+  <!-- Html5Qrcode for Live Camera QR Scanning -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <script>
@@ -43,8 +43,8 @@
             }
           },
           fontFamily: {
-            sans: ['Sarabun', 'sans-serif'],
-            mono: ['Sarabun', 'monospace']
+            sans: ['Sarabun', 'TH Sarabun New', 'sans-serif'],
+            mono: ['Sarabun', 'TH Sarabun New', 'monospace']
           },
           boxShadow: {
             'card': '0 2px 10px -2px rgba(30, 63, 127, 0.08), 0 1px 4px -1px rgba(0, 0, 0, 0.05)',
@@ -56,7 +56,7 @@
   </script>
 
   <style>
-    * { font-family: 'Sarabun', sans-serif !important; }
+    * { font-family: 'Sarabun', 'TH Sarabun New', sans-serif !important; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 9999px; }
@@ -91,6 +91,15 @@
         width: 210mm;
         box-sizing: border-box;
       }
+      .print-layout-auto {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 2.5mm;
+        padding: 3mm;
+        width: 100%;
+        box-sizing: border-box;
+      }
       .print-layout-cols-2 {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -117,42 +126,34 @@
       }
     }
 
+    /* Standard Enterprise Label Sizes */
     .label-size-32x25 { width: 32mm; height: 25mm; box-sizing: border-box; overflow: hidden; border-radius: 2mm; }
     .label-size-50x25 { width: 50mm; height: 25mm; box-sizing: border-box; overflow: hidden; border-radius: 2mm; }
     .label-size-70x35 { width: 70mm; height: 35mm; box-sizing: border-box; overflow: hidden; border-radius: 2.5mm; }
     .label-size-80x40 { width: 80mm; height: 40mm; box-sizing: border-box; overflow: hidden; border-radius: 2.5mm; }
 
+    /* Ultra-Scannable Crisp QR Code Styles with ISO Quiet Zone */
     .qr-code-box {
       background-color: #ffffff !important;
       box-sizing: border-box !important;
-      padding: 1.2mm !important;
+      padding: 1.5mm !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       aspect-ratio: 1 / 1 !important;
-      overflow: hidden !important;
-      flex-shrink: 0 !important;
-      position: relative !important;
     }
-    .qr-size-32 { width: 14mm !important; height: 14mm !important; min-width: 14mm !important; min-height: 14mm !important; max-width: 14mm !important; max-height: 14mm !important; }
-    .qr-size-50 { width: 17mm !important; height: 17mm !important; min-width: 17mm !important; min-height: 17mm !important; max-width: 17mm !important; max-height: 17mm !important; }
-    .qr-size-70 { width: 22mm !important; height: 22mm !important; min-width: 22mm !important; min-height: 22mm !important; max-width: 22mm !important; max-height: 22mm !important; }
-    .qr-size-80 { width: 22mm !important; height: 22mm !important; min-width: 22mm !important; min-height: 22mm !important; max-width: 22mm !important; max-height: 22mm !important; }
-
-    .qr-code-box canvas, .qr-code-box img {
+    .qr-code-box canvas,
+    .qr-code-box img {
       width: 100% !important;
       height: 100% !important;
       max-width: 100% !important;
       max-height: 100% !important;
       aspect-ratio: 1 / 1 !important;
       object-fit: contain !important;
-      margin: 0 auto !important;
-      image-rendering: -webkit-optimize-contrast !important;
-      image-rendering: pixelated !important;
-    }
-    .qr-code-box canvas[style*="display: none"],
-    .qr-code-box img[style*="display: none"] {
-      display: none !important;
+      display: block !important;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      image-rendering: pixelated;
     }
   </style>
 </head>
@@ -226,7 +227,7 @@
             <span class="text-[11px] text-emerald-300 font-bold hidden sm:inline">TAS 16 Live Feed</span>
           </div>
           <h1 class="text-base sm:text-xl font-black tracking-tight text-white mt-0.5">สรุปภาพรวมและมูลค่าทรัพย์สินกลุ่มบริษัท CC1971GROUP</h1>
-          <p class="text-xs text-stone-300">รายงานสถานะการลงทุน มูลค่าทางบัญชี และค่าเสื่อมราคาสะสมแบบเรียลไทม์</p>
+          <p class="text-xs text-stone-300" id="execFsSubtitle">รายงานสถานะการลงทุน มูลค่าทางบัญชี และค่าเสื่อมราคาสะสมแบบเรียลไทม์</p>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
@@ -273,7 +274,6 @@
         <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm flex flex-col justify-between">
           <h3 class="font-black text-slate-900 text-sm mb-2">สัดส่วนมูลค่าตามหมวดหมู่</h3>
           <div class="h-56 flex items-center justify-center"><canvas id="execFsPieChart"></canvas></div>
-          <div class="text-[11px] text-center text-slate-400 pt-2 border-t border-slate-100">สูตรเส้นตรง TAS 16</div>
         </div>
       </div>
 
@@ -297,32 +297,11 @@
           </table>
         </div>
       </div>
-
-      <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden">
-        <div class="p-4 sm:p-5 bg-stone-50 border-b border-stone-200 font-black text-slate-900 text-sm">
-          💎 สินทรัพย์ที่มีมูลค่าสูงสุด 5 อันดับแรก (Top 5 Valued Capital Assets)
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-stone-100/70 border-b border-stone-200 text-slate-700 font-bold">
-              <tr>
-                <th class="p-3.5">รหัส</th>
-                <th class="p-3.5">รายการ</th>
-                <th class="p-3.5">สังกัด</th>
-                <th class="p-3.5">ผู้ถือครอง / สถานที่</th>
-                <th class="p-3.5 text-right">ราคาทุน (Cost)</th>
-                <th class="p-3.5 text-right">มูลค่าคงเหลือ (NBV)</th>
-                <th class="p-3.5 text-center">สถานะ</th>
-              </tr>
-            </thead>
-            <tbody id="execFsTopAssetsTableBody" class="divide-y divide-stone-100"></tbody>
-          </table>
-        </div>
-      </div>
     </main>
   </div>
 
   <div class="flex-1 flex h-screen overflow-hidden">
+    <!-- Left Sidebar -->
     <aside id="mainSidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col shrink-0 transition-all duration-300 z-30 fixed inset-y-0 left-0 lg:static -translate-x-full lg:translate-x-0 shadow-lg lg:shadow-none">
       <div class="h-[72px] px-5 flex items-center gap-3 border-b border-slate-200/70 bg-gradient-to-r from-navy-950 via-slate-900 to-navy-900 text-white shrink-0 shadow-xs">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-orange-600 flex items-center justify-center text-white font-black text-lg shadow-sm border border-white/20">CC</div>
@@ -355,7 +334,7 @@
       <div class="p-3 border-t border-slate-200/70 bg-navy-50/50">
         <div class="bg-white rounded-xl p-3 border border-navy-100 shadow-xs">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-[11px] font-bold text-slate-500">สถานะคลาวด์</span>
+            <span class="text-[11px] font-bold text-slate-500">สถานะเครือข่าย</span>
             <span class="inline-flex items-center gap-1 text-[10px] font-black text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> ออนไลน์</span>
           </div>
           <div class="text-[11px] text-slate-700 font-bold flex items-center justify-between">
@@ -368,6 +347,7 @@
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-20 hidden lg:hidden"></div>
 
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <!-- Top Header -->
       <header class="min-h-[72px] bg-white border-b border-slate-200/80 px-4 sm:px-7 py-3 flex items-center justify-between shrink-0 shadow-xs gap-4">
         <div class="flex items-center gap-3.5 min-w-0">
           <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-navy-50">☰</button>
@@ -614,14 +594,14 @@
             </div>
           </div>
 
-          <!-- Custom Base URL Config Bar for ultra-clean, scannable QR codes -->
+          <!-- Custom Base URL Config Bar -->
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-stone-50 rounded-2xl border border-stone-200 text-xs">
             <span class="font-bold text-slate-700 shrink-0 flex items-center gap-1">
-              <span>🌐</span> URL ระบบสำหรับ QR Code:
+              <span>🌐</span> URL หน้าเว็บสำหรับสร้าง QR:
             </span>
             <input type="text" id="stickerCustomUrlInput" onchange="renderStickersPreview()" placeholder="https://amonsart.github.io/cc1971-asset-system1/" class="flex-1 p-2 border border-slate-300 rounded-xl font-mono text-[11px] bg-white text-brand-700 font-bold">
-            <button type="button" onclick="resetStickerCustomUrl()" class="px-3 py-2 rounded-xl bg-stone-200 hover:bg-stone-300 text-slate-700 font-bold text-xs shrink-0 transition">
-              รีเซ็ตเป็น GitHub Pages
+            <button onclick="resetStickerCustomUrl()" class="px-3 py-2 rounded-xl bg-stone-200 hover:bg-stone-300 text-slate-700 font-bold text-xs shrink-0 transition">
+              รีเซ็ตตามโดเมนจริง
             </button>
           </div>
         </div>
@@ -973,8 +953,8 @@
     </div>
   </div>
 
-  <!-- Digital Asset Passport Modal (Priority Dialog z-[200]) -->
-  <div id="passportModal" class="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden no-print">
+  <!-- Digital Asset Passport Modal (Priority Dialog z-[99999]) -->
+  <div id="passportModal" class="fixed inset-0 z-[99999] bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden no-print" style="display: none;">
     <div class="bg-white rounded-3xl w-full max-w-2xl flex flex-col max-h-[92vh] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150 border border-slate-200">
       <div class="p-4 sm:p-5 bg-gradient-to-r from-navy-950 via-slate-900 to-navy-900 text-white flex justify-between items-center shrink-0 border-b border-white/10">
         <div class="flex items-center gap-3">
@@ -1466,6 +1446,7 @@ function writeSheetRows(ss, n, items) {
           saveToLocalStorage();
           populateCompanySelectors();
           refreshActiveView();
+          handleInitialDeepLink();
           if (!isSilent) showToast('ดึงข้อมูลสำเร็จ (' + assets.length + ' รายการ)');
         }
       } catch(err) {
@@ -2100,6 +2081,42 @@ function writeSheetRows(ss, n, items) {
     }
     function removeAssetImage() { setFormImagePreview(''); }
 
+    function extractAssetCodeFromUrl(input) {
+      if (!input) return '';
+      let str = String(input).trim();
+      
+      try {
+        if (str.includes('?')) {
+          const search = str.substring(str.indexOf('?'));
+          const params = new URLSearchParams(search.split('#')[0]);
+          const q = params.get('asset') || params.get('id') || params.get('code');
+          if (q) return decodeURIComponent(q).trim();
+        }
+      } catch(e) {}
+
+      if (str.includes('#')) {
+        const hash = str.substring(str.indexOf('#') + 1).trim();
+        if (hash.includes('asset=')) return decodeURIComponent(hash.split('asset=')[1].split('&')[0]).trim();
+        if (hash.includes('id=')) return decodeURIComponent(hash.split('id=')[1].split('&')[0]).trim();
+        const clean = hash.split('&')[0].split('?')[0].replace(/^[\/#!]+/, '').trim();
+        if (clean && clean !== 'executive' && clean !== 'dashboard' && !clean.startsWith('http') && !clean.startsWith('file')) {
+          return decodeURIComponent(clean).trim();
+        }
+      }
+
+      if (str.includes('CC1971:')) {
+        str = str.split('CC1971:')[1];
+      }
+      if (str.includes('|')) {
+        return str.split('|')[0].trim();
+      }
+
+      if (str.startsWith('http://') || str.startsWith('https://') || str.startsWith('file://')) {
+        return '';
+      }
+      return str;
+    }
+
     function findAssetById(id) {
       if (!id || !assets || assets.length === 0) return null;
       const clean = String(id).trim().toLowerCase();
@@ -2114,14 +2131,29 @@ function writeSheetRows(ss, n, items) {
 
     function openPassportModal(id) {
       if (!id) return;
-      const a = findAssetById(id);
+      let a = findAssetById(id);
       if (!a) {
-        showToast('ไม่พบรหัส ' + id + ' ในระบบ', false);
-        return;
+        a = {
+          id: id,
+          companyId: id.startsWith('CCLG') ? 'CC-LOGIS' : 'CC-HQ',
+          name: 'สินทรัพย์ [' + id + ']',
+          category: id.includes('-VH-') ? 'ยานพาหนะ' : (id.includes('-IT-') ? 'IT & คอมพิวเตอร์' : 'อุปกรณ์สำนักงาน'),
+          serial: '-',
+          department: '-',
+          location: '-',
+          custodian: '-',
+          status: 'พร้อมใช้',
+          cost: 0,
+          salvage: 1,
+          lifespan: 5,
+          acquiredDate: new Date().toISOString().split('T')[0],
+          imageUrl: 'https://placehold.co/400x400/f97316/ffffff?text=' + encodeURIComponent(id)
+        };
+        assets.unshift(a);
+        saveToLocalStorage();
       }
       currentActivePassportAssetId = a.id;
 
-      // Force display modal immediately in the foreground
       const modal = document.getElementById('passportModal');
       if (modal) {
         modal.classList.remove('hidden');
@@ -2316,7 +2348,8 @@ function writeSheetRows(ss, n, items) {
           (t) => {
             closeLiveScannerModal();
             const code = extractAssetCodeFromUrl(t);
-            if (code && !attemptOpenPassport(code)) showToast('ไม่พบรหัส ' + code, false);
+            if (code) openPassportModal(code);
+            else showToast('ไม่พบรหัส', false);
           },
           () => {}
         );
@@ -2331,7 +2364,8 @@ function writeSheetRows(ss, n, items) {
       if (v) {
         closeLiveScannerModal();
         const c = extractAssetCodeFromUrl(v);
-        if (!attemptOpenPassport(c)) showToast('ไม่พบรหัสในระบบ', false);
+        if (c) openPassportModal(c);
+        else showToast('ไม่พบรหัสในระบบ', false);
       }
     }
 
@@ -2344,21 +2378,17 @@ function writeSheetRows(ss, n, items) {
         return base;
       }
 
-      let detected = '';
+      let detected = 'https://amonsart.github.io/cc1971-asset-system1/';
       try {
         const origin = window.location.origin;
         let pathname = window.location.pathname;
-        if (origin && !origin.includes('null') && !origin.includes('sandbox') && !origin.includes('blob:')) {
+        if (origin && !origin.includes('null') && !origin.includes('sandbox') && !origin.includes('file:') && !origin.includes('blob:')) {
           detected = `${origin}${pathname}`;
           if (!detected.endsWith('/') && !detected.endsWith('.html')) {
             detected += '/';
           }
         }
       } catch (e) {}
-
-      if (!detected || detected.length > 90 || detected.includes('blob:') || detected.includes('srcdoc')) {
-        detected = 'https://amonsart.github.io/cc1971-asset-system1/';
-      }
 
       if (inputEl && !inputEl.value) {
         inputEl.value = detected;
@@ -2371,7 +2401,7 @@ function writeSheetRows(ss, n, items) {
       if (!inputEl) return;
       let detected = 'https://amonsart.github.io/cc1971-asset-system1/';
       try {
-        if (window.location.origin && !window.location.origin.includes('null') && !window.location.origin.includes('sandbox')) {
+        if (window.location.origin && !window.location.origin.includes('null') && !window.location.origin.includes('file:')) {
           let pathname = window.location.pathname;
           if (!pathname.endsWith('/') && !pathname.endsWith('.html')) pathname += '/';
           detected = `${window.location.origin}${pathname}`;
@@ -2406,6 +2436,7 @@ function writeSheetRows(ss, n, items) {
       const sc = getScopedAssets();
       const sz = document.getElementById('stickerSizeSelector')?.value || '70x35';
       const mode = document.getElementById('stickerPayloadMode')?.value || 'cleanUrl';
+      const cleanBase = getCleanBaseAssetUrl();
 
       if (!selectedStickerAssetIds.size && sc.length) {
         sc.forEach(a => selectedStickerAssetIds.add(a.id));
@@ -2483,26 +2514,9 @@ function writeSheetRows(ss, n, items) {
             } else if (mode === 'quickText') {
               payload = 'CC1971:' + a.id + '|' + a.name;
             } else {
-              const baseUrl = getCleanBaseAssetUrl();
-              payload = baseUrl + '?asset=' + encodeURIComponent(a.id);
-              // Smart Cross-Device Bridge: Embed essential metadata so ANY scanning device instantly gets the asset card
-              if (a.name) payload += '&n=' + encodeURIComponent(a.name);
-              if (a.companyId) payload += '&comp=' + encodeURIComponent(a.companyId);
-              if (a.category) payload += '&cat=' + encodeURIComponent(a.category);
-              if (a.location) payload += '&loc=' + encodeURIComponent(a.location);
-              if (a.department) payload += '&dept=' + encodeURIComponent(a.department);
-              if (a.custodian) payload += '&cust=' + encodeURIComponent(a.custodian);
-              if (a.cost) payload += '&cost=' + encodeURIComponent(a.cost);
-              if (a.serial) payload += '&sn=' + encodeURIComponent(a.serial);
-              if (a.status) payload += '&st=' + encodeURIComponent(a.status);
-              if (a.warrantyDate) payload += '&w=' + encodeURIComponent(a.warrantyDate);
-              if (a.nextServiceDate) payload += '&s=' + encodeURIComponent(a.nextServiceDate);
-              if (googleSheetConfig.webAppUrl) {
-                payload += '&gas=' + encodeURIComponent(googleSheetConfig.webAppUrl);
-              }
+              payload = cleanBase + '?asset=' + encodeURIComponent(a.id) + '#asset=' + encodeURIComponent(a.id);
             }
             
-            // Generate strictly 1:1 square QR code with Version 3/4 crisp dots
             new QRCode(qEl, { 
               text: payload, 
               width: 128, 
@@ -2512,7 +2526,6 @@ function writeSheetRows(ss, n, items) {
               correctLevel: QRCode.CorrectLevel.L 
             });
 
-            // Remove any hidden canvas/image clone that causes flexbox distortion
             setTimeout(() => {
               const hiddenCanvas = qEl.querySelector('canvas[style*="display: none"]');
               if (hiddenCanvas) hiddenCanvas.remove();
@@ -2537,24 +2550,10 @@ function writeSheetRows(ss, n, items) {
       titleEl.textContent = assetName || assetId;
       codeEl.textContent = assetId;
       canvasBox.innerHTML = '';
-      
-      const a = assets.find(x => x.id === assetId);
       const cleanBase = getCleanBaseAssetUrl();
-      let payload = cleanBase + '?asset=' + encodeURIComponent(assetId);
-      if (a) {
-        if (a.name) payload += '&n=' + encodeURIComponent(a.name);
-        if (a.companyId) payload += '&comp=' + encodeURIComponent(a.companyId);
-        if (a.category) payload += '&cat=' + encodeURIComponent(a.category);
-        if (a.location) payload += '&loc=' + encodeURIComponent(a.location);
-        if (a.department) payload += '&dept=' + encodeURIComponent(a.department);
-        if (a.custodian) payload += '&cust=' + encodeURIComponent(a.custodian);
-        if (a.cost) payload += '&cost=' + encodeURIComponent(a.cost);
-        if (a.serial) payload += '&sn=' + encodeURIComponent(a.serial);
-        if (googleSheetConfig.webAppUrl) payload += '&gas=' + encodeURIComponent(googleSheetConfig.webAppUrl);
-      }
       
       new QRCode(canvasBox, {
-        text: payload,
+        text: cleanBase + '?asset=' + encodeURIComponent(assetId) + '#asset=' + encodeURIComponent(assetId),
         width: 180,
         height: 180,
         colorDark: '#000000',
@@ -2846,22 +2845,6 @@ function writeSheetRows(ss, n, items) {
           '<td class="p-3 text-right font-bold text-emerald-600">' + formatCurrency(xn) + '</td>' +
           '<td class="p-3 text-center">' + (n > 0 ? Math.round((xn / n) * 100) : 0) + '%</td>';
         tb.appendChild(tr);
-      });
-
-      const top = document.getElementById('execFsTopAssetsTableBody');
-      top.innerHTML = '';
-      [...f].sort((a, b) => calculateTAS16Depreciation(b, 2026).nbv - calculateTAS16Depreciation(a, 2026).nbv).slice(0, 5).forEach(a => {
-        const tr = document.createElement('tr');
-        tr.className = 'border-b';
-        tr.innerHTML = 
-          '<td class="p-3 font-mono font-bold">' + a.id + '</td>' +
-          '<td class="p-3 font-bold">' + a.name + '</td>' +
-          '<td class="p-3">' + a.companyId + '</td>' +
-          '<td class="p-3">' + (a.custodian || '-') + '</td>' +
-          '<td class="p-3 text-right">' + formatCurrency(a.cost) + '</td>' +
-          '<td class="p-3 text-right font-bold text-emerald-600">' + formatCurrency(calculateTAS16Depreciation(a, 2026).nbv) + '</td>' +
-          '<td class="p-3 text-center">' + a.status + '</td>';
-        top.appendChild(tr);
       });
 
       const cats = ['IT & คอมพิวเตอร์', 'อุปกรณ์สำนักงาน', 'ยานพาหนะ', 'เครื่องจักร & อุปกรณ์โรงงาน', 'เฟอร์นิเจอร์สำนักงาน'];
@@ -3465,7 +3448,7 @@ function writeSheetRows(ss, n, items) {
             qrBox.className = 'w-[22mm] h-[22mm] bg-white mx-auto p-1 flex items-center justify-center border border-slate-300 rounded';
             const cleanBase = getCleanBaseAssetUrl();
             new QRCode(qrBox, {
-              text: cleanBase + '?asset=' + encodeURIComponent(targetAsset.id),
+              text: cleanBase + '#asset=' + encodeURIComponent(targetAsset.id),
               width: 140,
               height: 140,
               colorDark: '#000000',
@@ -3541,131 +3524,50 @@ function writeSheetRows(ss, n, items) {
       }
     }
 
-    function extractAssetCodeFromUrl(input) {
-      if (!input) return '';
-      let str = String(input).trim();
-      
-      try {
-        if (str.includes('?')) {
-          const search = str.substring(str.indexOf('?'));
-          const params = new URLSearchParams(search.split('#')[0]);
-          const q = params.get('asset') || params.get('id') || params.get('code');
-          if (q) return decodeURIComponent(q).trim();
-        }
-      } catch(e) {}
-
-      if (str.includes('#')) {
-        const hash = str.substring(str.indexOf('#') + 1).trim();
-        if (hash.includes('asset=')) return decodeURIComponent(hash.split('asset=')[1].split('&')[0]).trim();
-        if (hash.includes('id=')) return decodeURIComponent(hash.split('id=')[1].split('&')[0]).trim();
-        const clean = hash.split('&')[0].split('?')[0].replace(/^[\/#!]+/, '').trim();
-        if (clean && clean !== 'executive' && clean !== 'dashboard' && !clean.startsWith('http')) {
-          return decodeURIComponent(clean).trim();
-        }
-      }
-
-      if (str.includes('CC1971:')) {
-        str = str.split('CC1971:')[1];
-      }
-      if (str.includes('|')) {
-        return str.split('|')[0].trim();
-      }
-
-      if (str.startsWith('http://') || str.startsWith('https://')) {
-        return '';
-      }
-      return str;
-    }
-
-    function attemptOpenPassport(id) {
-      if (!id) return false;
-      const match = findAssetById(id);
-      if (match) {
-        document.getElementById('executiveFullScreenView')?.classList.add('hidden');
-        openPassportModal(match.id);
-        return true;
-      }
-      return false;
-    }
-
-    async function handleInitialDeepLink() {
+    function handleInitialDeepLink() {
       if (window.location.hash && window.location.hash.includes('executive')) {
         setTimeout(openExecutiveFullScreen, 100);
         return;
       }
 
-      const searchStr = window.location.search || '';
-      const hashStr = window.location.hash || '';
-      const urlParams = new URLSearchParams(searchStr);
-      const hashParams = new URLSearchParams(hashStr.includes('?') ? hashStr.substring(hashStr.indexOf('?')) : '');
-
-      // 1. Auto-Pair Google Sheets if provided in QR link
-      const gasUrl = urlParams.get('gas') || hashParams.get('gas');
-      if (gasUrl && (!googleSheetConfig.webAppUrl || googleSheetConfig.webAppUrl !== gasUrl)) {
-        googleSheetConfig.webAppUrl = decodeURIComponent(gasUrl);
-        googleSheetConfig.autoSync = true;
-        saveToLocalStorage();
-        updateGoogleSheetStatusBadge();
-      }
-
-      // 2. Extract asset target ID
-      const targetId = urlParams.get('asset') || urlParams.get('id') || urlParams.get('code') ||
-                       hashParams.get('asset') || hashParams.get('id') || hashParams.get('code') ||
-                       extractAssetCodeFromUrl(searchStr) ||
-                       extractAssetCodeFromUrl(hashStr) ||
+      const targetId = extractAssetCodeFromUrl(window.location.search) || 
+                       extractAssetCodeFromUrl(window.location.hash) ||
                        extractAssetCodeFromUrl(window.location.href);
 
-      if (!targetId || targetId === 'executive' || targetId === 'dashboard') return;
-
-      // 3. Instant lookup in local memory
-      let found = findAssetById(targetId);
-
-      // 4. Cross-Device Cloud Bridge: If not found in local memory, hydrate immediately from embedded QR parameters!
-      if (!found) {
-        const rawName = urlParams.get('n') || urlParams.get('name') || hashParams.get('n') || hashParams.get('name');
-        if (rawName) {
-          const newAsset = {
-            id: targetId,
-            companyId: decodeURIComponent(urlParams.get('comp') || hashParams.get('comp') || 'CC-HQ'),
-            name: decodeURIComponent(rawName),
-            category: decodeURIComponent(urlParams.get('cat') || hashParams.get('cat') || 'อุปกรณ์สำนักงาน'),
-            serial: decodeURIComponent(urlParams.get('sn') || hashParams.get('sn') || '-'),
-            department: decodeURIComponent(urlParams.get('dept') || hashParams.get('dept') || '-'),
-            location: decodeURIComponent(urlParams.get('loc') || hashParams.get('loc') || '-'),
-            custodian: decodeURIComponent(urlParams.get('cust') || hashParams.get('cust') || '-'),
-            status: decodeURIComponent(urlParams.get('st') || hashParams.get('st') || 'พร้อมใช้'),
-            cost: parseFloat(urlParams.get('cost') || hashParams.get('cost') || 0) || 0,
-            salvage: 1,
-            lifespan: 5,
-            acquiredDate: new Date().toISOString().split('T')[0],
-            warrantyDate: decodeURIComponent(urlParams.get('w') || hashParams.get('w') || ''),
-            nextServiceDate: decodeURIComponent(urlParams.get('s') || hashParams.get('s') || ''),
-            imageUrl: 'https://placehold.co/400x400/f97316/ffffff?text=' + encodeURIComponent(targetId),
-            lastAuditedDate: new Date().toISOString().split('T')[0],
-            lastAuditor: 'QR Scanner'
-          };
-          assets.unshift(newAsset);
-          saveToLocalStorage();
-          found = newAsset;
-        }
-      }
-
-      // 5. Instantly open passport card
-      if (found) {
-        attemptOpenPassport(found.id);
+      if (!targetId || targetId === 'executive' || targetId === 'dashboard' || targetId.startsWith('http')) {
         return;
       }
 
-      // 6. Retry after brief hydration if memory was busy
-      setTimeout(() => {
-        if (!currentActivePassportAssetId) attemptOpenPassport(targetId);
-      }, 200);
-
-      // 7. Fallback: Pull from Google Sheets if connected
-      if (googleSheetConfig.webAppUrl) {
-        await pullDataFromGoogleSheets(true);
-        attemptOpenPassport(targetId);
+      if (attemptOpenPassport(targetId)) {
+        return;
       }
+
+      [150, 400].forEach(delay => {
+        setTimeout(() => {
+          if (!currentActivePassportAssetId) {
+            attemptOpenPassport(targetId);
+          }
+        }, delay);
+      });
+
+      if (googleSheetConfig.webAppUrl) {
+        pullDataFromGoogleSheets(true).then(() => {
+          if (!currentActivePassportAssetId) {
+            attemptOpenPassport(targetId);
+          }
+        });
+      }
+    }
+
+    function attemptOpenPassport(id) {
+      if (!id) return false;
+      const cleanTargetId = String(id).trim().toLowerCase();
+      let match = findAssetById(cleanTargetId);
+      if (match) {
+        openPassportModal(match.id);
+        return true;
+      }
+      return false;
     }
 
     function refreshActiveView() {
@@ -3683,17 +3585,19 @@ function writeSheetRows(ss, n, items) {
       initStorageAndData();
       initSignaturePad();
       populateCompanySelectors();
-      getCleanBaseAssetUrl(); // Initialize base URL
+      getCleanBaseAssetUrl();
       switchTab('dashboard');
+      
+      handleInitialDeepLink();
+      window.addEventListener('hashchange', handleInitialDeepLink);
+      window.addEventListener('popstate', handleInitialDeepLink);
+
       if (googleSheetConfig.webAppUrl && googleSheetConfig.autoSync) {
-        pullDataFromGoogleSheets(true);
+        setTimeout(() => pullDataFromGoogleSheets(true), 800);
       }
-      await handleInitialDeepLink();
     };
 
     document.addEventListener('DOMContentLoaded', handleInitialDeepLink);
-    window.addEventListener('hashchange', handleInitialDeepLink);
-    window.addEventListener('popstate', handleInitialDeepLink);
   </script>
 </body>
 </html>
