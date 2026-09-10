@@ -2120,6 +2120,15 @@ function writeSheetRows(ss, n, items) {
         return;
       }
       currentActivePassportAssetId = a.id;
+
+      // Force display modal immediately in the foreground
+      const modal = document.getElementById('passportModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+      }
+
       const dep = calculateTAS16Depreciation(a, 2026);
 
       document.getElementById('passportImg').src = a.imageUrl || 'https://placehold.co/400';
@@ -2159,18 +2168,15 @@ function writeSheetRows(ss, n, items) {
           });
         }
       }
-
-      const modal = document.getElementById('passportModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      modal.style.display = 'flex';
     }
 
     function closePassportModal() {
       const modal = document.getElementById('passportModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      modal.style.display = 'none';
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modal.style.display = 'none';
+      }
       currentActivePassportAssetId = null;
     }
 
@@ -2479,6 +2485,21 @@ function writeSheetRows(ss, n, items) {
             } else {
               const baseUrl = getCleanBaseAssetUrl();
               payload = baseUrl + '?asset=' + encodeURIComponent(a.id);
+              // Smart Cross-Device Bridge: Embed essential metadata so ANY scanning device instantly gets the asset card
+              if (a.name) payload += '&n=' + encodeURIComponent(a.name);
+              if (a.companyId) payload += '&comp=' + encodeURIComponent(a.companyId);
+              if (a.category) payload += '&cat=' + encodeURIComponent(a.category);
+              if (a.location) payload += '&loc=' + encodeURIComponent(a.location);
+              if (a.department) payload += '&dept=' + encodeURIComponent(a.department);
+              if (a.custodian) payload += '&cust=' + encodeURIComponent(a.custodian);
+              if (a.cost) payload += '&cost=' + encodeURIComponent(a.cost);
+              if (a.serial) payload += '&sn=' + encodeURIComponent(a.serial);
+              if (a.status) payload += '&st=' + encodeURIComponent(a.status);
+              if (a.warrantyDate) payload += '&w=' + encodeURIComponent(a.warrantyDate);
+              if (a.nextServiceDate) payload += '&s=' + encodeURIComponent(a.nextServiceDate);
+              if (googleSheetConfig.webAppUrl) {
+                payload += '&gas=' + encodeURIComponent(googleSheetConfig.webAppUrl);
+              }
             }
             
             // Generate strictly 1:1 square QR code with Version 3/4 crisp dots
@@ -2517,8 +2538,20 @@ function writeSheetRows(ss, n, items) {
       codeEl.textContent = assetId;
       canvasBox.innerHTML = '';
       
+      const a = assets.find(x => x.id === assetId);
       const cleanBase = getCleanBaseAssetUrl();
-      const payload = cleanBase + '?asset=' + encodeURIComponent(assetId);
+      let payload = cleanBase + '?asset=' + encodeURIComponent(assetId);
+      if (a) {
+        if (a.name) payload += '&n=' + encodeURIComponent(a.name);
+        if (a.companyId) payload += '&comp=' + encodeURIComponent(a.companyId);
+        if (a.category) payload += '&cat=' + encodeURIComponent(a.category);
+        if (a.location) payload += '&loc=' + encodeURIComponent(a.location);
+        if (a.department) payload += '&dept=' + encodeURIComponent(a.department);
+        if (a.custodian) payload += '&cust=' + encodeURIComponent(a.custodian);
+        if (a.cost) payload += '&cost=' + encodeURIComponent(a.cost);
+        if (a.serial) payload += '&sn=' + encodeURIComponent(a.serial);
+        if (googleSheetConfig.webAppUrl) payload += '&gas=' + encodeURIComponent(googleSheetConfig.webAppUrl);
+      }
       
       new QRCode(canvasBox, {
         text: payload,
@@ -3561,31 +3594,74 @@ function writeSheetRows(ss, n, items) {
         return;
       }
 
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const gasUrl = params.get('gas');
-        if (gasUrl && !googleSheetConfig.webAppUrl) {
-          googleSheetConfig.webAppUrl = decodeURIComponent(gasUrl);
-          saveToLocalStorage();
-          updateGoogleSheetStatusBadge();
-        }
-      } catch(e) {}
+      const searchStr = window.location.search || '';
+      const hashStr = window.location.hash || '';
+      const urlParams = new URLSearchParams(searchStr);
+      const hashParams = new URLSearchParams(hashStr.includes('?') ? hashStr.substring(hashStr.indexOf('?')) : '');
 
-      const targetId = extractAssetCodeFromUrl(window.location.search) ||
-                       extractAssetCodeFromUrl(window.location.hash) ||
+      // 1. Auto-Pair Google Sheets if provided in QR link
+      const gasUrl = urlParams.get('gas') || hashParams.get('gas');
+      if (gasUrl && (!googleSheetConfig.webAppUrl || googleSheetConfig.webAppUrl !== gasUrl)) {
+        googleSheetConfig.webAppUrl = decodeURIComponent(gasUrl);
+        googleSheetConfig.autoSync = true;
+        saveToLocalStorage();
+        updateGoogleSheetStatusBadge();
+      }
+
+      // 2. Extract asset target ID
+      const targetId = urlParams.get('asset') || urlParams.get('id') || urlParams.get('code') ||
+                       hashParams.get('asset') || hashParams.get('id') || hashParams.get('code') ||
+                       extractAssetCodeFromUrl(searchStr) ||
+                       extractAssetCodeFromUrl(hashStr) ||
                        extractAssetCodeFromUrl(window.location.href);
 
       if (!targetId || targetId === 'executive' || targetId === 'dashboard') return;
 
-      // 1. Attempt instant launch if present in memory
-      if (attemptOpenPassport(targetId)) return;
+      // 3. Instant lookup in local memory
+      let found = findAssetById(targetId);
 
-      // 2. Retry after DOM and state hydration
+      // 4. Cross-Device Cloud Bridge: If not found in local memory, hydrate immediately from embedded QR parameters!
+      if (!found) {
+        const rawName = urlParams.get('n') || urlParams.get('name') || hashParams.get('n') || hashParams.get('name');
+        if (rawName) {
+          const newAsset = {
+            id: targetId,
+            companyId: decodeURIComponent(urlParams.get('comp') || hashParams.get('comp') || 'CC-HQ'),
+            name: decodeURIComponent(rawName),
+            category: decodeURIComponent(urlParams.get('cat') || hashParams.get('cat') || 'อุปกรณ์สำนักงาน'),
+            serial: decodeURIComponent(urlParams.get('sn') || hashParams.get('sn') || '-'),
+            department: decodeURIComponent(urlParams.get('dept') || hashParams.get('dept') || '-'),
+            location: decodeURIComponent(urlParams.get('loc') || hashParams.get('loc') || '-'),
+            custodian: decodeURIComponent(urlParams.get('cust') || hashParams.get('cust') || '-'),
+            status: decodeURIComponent(urlParams.get('st') || hashParams.get('st') || 'พร้อมใช้'),
+            cost: parseFloat(urlParams.get('cost') || hashParams.get('cost') || 0) || 0,
+            salvage: 1,
+            lifespan: 5,
+            acquiredDate: new Date().toISOString().split('T')[0],
+            warrantyDate: decodeURIComponent(urlParams.get('w') || hashParams.get('w') || ''),
+            nextServiceDate: decodeURIComponent(urlParams.get('s') || hashParams.get('s') || ''),
+            imageUrl: 'https://placehold.co/400x400/f97316/ffffff?text=' + encodeURIComponent(targetId),
+            lastAuditedDate: new Date().toISOString().split('T')[0],
+            lastAuditor: 'QR Scanner'
+          };
+          assets.unshift(newAsset);
+          saveToLocalStorage();
+          found = newAsset;
+        }
+      }
+
+      // 5. Instantly open passport card
+      if (found) {
+        attemptOpenPassport(found.id);
+        return;
+      }
+
+      // 6. Retry after brief hydration if memory was busy
       setTimeout(() => {
         if (!currentActivePassportAssetId) attemptOpenPassport(targetId);
-      }, 250);
+      }, 200);
 
-      // 3. Fallback: Pull latest database from Google Sheets and open
+      // 7. Fallback: Pull from Google Sheets if connected
       if (googleSheetConfig.webAppUrl) {
         await pullDataFromGoogleSheets(true);
         attemptOpenPassport(targetId);
@@ -3615,6 +3691,7 @@ function writeSheetRows(ss, n, items) {
       await handleInitialDeepLink();
     };
 
+    document.addEventListener('DOMContentLoaded', handleInitialDeepLink);
     window.addEventListener('hashchange', handleInitialDeepLink);
     window.addEventListener('popstate', handleInitialDeepLink);
   </script>
