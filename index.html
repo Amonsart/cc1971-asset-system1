@@ -9,7 +9,7 @@
 <body>
   <div id="loading">กำลังเปิดระบบจัดการทรัพย์สิน…</div>
   <script>
-    fetch('https://tjxxqheuuzitvyaifqkt.supabase.co/storage/v1/object/public/cc1971-app/index.html?v=20260916-executive-remember')
+    fetch('https://tjxxqheuuzitvyaifqkt.supabase.co/storage/v1/object/public/cc1971-app/index.html?v=20260916-normal-logout')
       .then(function (res) { if (!res.ok) throw new Error('โหลดระบบไม่สำเร็จ'); return res.text(); })
       .then(function (html) { document.open(); document.write(html); document.close(); })
       .catch(function () { document.getElementById('loading').innerHTML = 'ไม่สามารถเปิดระบบได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'; });
