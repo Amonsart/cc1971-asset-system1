@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CC1971GROUP Executive Dashboard</title>
+  <style>body{margin:0;background:#081320;font-family:system-ui,sans-serif}#loading{min-height:100vh;display:grid;place-items:center;color:#e2e8f0;font-size:16px}</style>
+</head>
+<body>
+  <div id="loading">กำลังเปิดแดชบอร์ดผู้บริหาร…</div>
+  <script>
+    fetch('https://tjxxqheuuzitvyaifqkt.supabase.co/storage/v1/object/public/cc1971-app/index.html?v=20260916-executive-direct')
+      .then(function (res) { if (!res.ok) throw new Error('ไม่สามารถเปิดรายงานได้'); return res.text(); })
+      .then(function (html) { document.open(); document.write(html); document.close(); })
+      .catch(function () { document.getElementById('loading').textContent = 'ไม่สามารถเปิดรายงานผู้บริหารได้ กรุณาลองใหม่'; });
+  </script>
+</body>
+</html>
