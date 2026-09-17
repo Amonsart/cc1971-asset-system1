@@ -1,4 +1,3 @@
-
 // Preserve local changes until cloud sync succeeds; stale pulls must not overwrite a fresh save.
 let localCloudDirty = localStorage.getItem('cc1971.cloudDirty') === '1';
 function saveLocalData() {
@@ -53,3 +52,10 @@ async function pullFromSupabase() {
 }
 window.syncAllToSupabase = syncAllToSupabase;
 window.pullFromSupabase = pullFromSupabase;
+
+// Retry pending local saves while cloud service is temporarily unavailable.
+setInterval(() => {
+  try {
+    if (localStorage.getItem('cc1971.cloudDirty') === '1' && typeof window.syncAllToSupabase === 'function') void window.syncAllToSupabase();
+  } catch (e) {}
+}, 5000);
